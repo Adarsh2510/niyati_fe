@@ -2,18 +2,18 @@ import { OrbitControls, useTexture } from "@react-three/drei";
 import { Environment } from "@react-three/drei";
 import { InterviewerAvatar } from "../Avatar";
 import { useThree } from "@react-three/fiber";
+import { useState } from "react";
+import { animations } from "@/constants/interviewer";
 
 export default function Interviewer() {
     const backgroundImage = useTexture('/meeting-room.webp');
     const viewPort = useThree((state: any) => state.viewport);
+    const [animation, setAnimation] = useState(animations.SittingIdle);
+
     return (
         <>
-        <OrbitControls/>
         <Environment preset="sunset" />
-        <mesh>
-            <planeGeometry args={[viewPort.width, viewPort.height]} />
-            <meshBasicMaterial map={backgroundImage} />
-        </mesh>
+        <InterviewerAvatar position={[0, -3, -2]} scale={2} animation={animation} />
         </>
     )
 }
