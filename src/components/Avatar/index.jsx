@@ -38,6 +38,14 @@ export function InterviewerAvatar({ animation, ...props }) {
     //     actions[animation].fadeOut(0.5);
     // };
   }, [animation])
+
+  // useEffect(() => {
+  //   console.log(nodes.Wolf3D_Teeth.morphTargetDictionary)
+  //   nodes.Wolf3D_Head.morphTargetInfluences[nodes.Wolf3D_Teeth.morphTargetDictionary['mouthOpen']] = 1
+  //   console.log(nodes.Wolf3D_Teeth.morphTargetInfluences)
+  // }, [])
+
+  
   return (
     <group rotation-x={-Math.PI / 2}>
     <group ref={group} {...props} dispose={null}>

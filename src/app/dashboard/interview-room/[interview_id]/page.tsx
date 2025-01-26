@@ -5,7 +5,8 @@ import SubmitAnswer from "@/components/interview-room/SubmitAnswer";
 import { QuestionType } from "@/constants/questions";
 import { getNextQuestion, submitAnswer } from "@/lib/api/getInterviewData";
 import { IGetNextQuestionResponse } from "@/lib/api/types";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
+import Interviewer from "@/components/interview-room/Interviewer";
 
 export default function InterviewRoom({params}: {params: {interview_id: string}}) {    
     const { interview_id } = params;
@@ -15,7 +16,13 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     const [isQuestionAsked, setIsQuestionAsked] = useState(false);
     const [questionType, setQuestionType] = useState<QuestionType>(QuestionType.INITIAL);
     const [followUpQuestionId, setFollowUpQuestionId] = useState<string | null>(null);
-    const currentQuestion = currentQuestionData?.next_question ?? null;
+    const currentQuestion = currentQuestionData?.next_question ?? {
+        question_name: 'Hello, how are you?',
+        question_text: 'Hello, how are you?',
+        question_type: QuestionType.INITIAL,
+        is_last_question: false,
+        is_interview_completed: false
+    };
 
     const handleIsQuestionAsked = (is_question_asked: boolean) => {
         setIsQuestionAsked(is_question_asked);
@@ -71,6 +78,7 @@ return (
     <div>
       <h1>Interview Room for {interview_id}</h1>
       <QuestionSection currentQuestion={currentQuestion} handleIsQuestionAsked={handleIsQuestionAsked} questionType={questionType}/>
+      <Interviewer/>
       <SubmitAnswer handleSubmitAnswer={handleSubmitAnswer}/>
     </div>
   );
