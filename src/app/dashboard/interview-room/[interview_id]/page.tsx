@@ -7,10 +7,13 @@ import { QuestionType } from "@/constants/questions";
 import QuestionSection from "@/components/InterviewScene/QuestionSection";
 import InterviewControllers from "@/components/InterviewScene/InterviewControllers";
 import { getNextQuestion, submitAnswer } from "@/lib/api/getInterviewData";
+import { TUserResponse } from '@/types/interview_room'
+import { redirect } from 'next/navigation';
 
 export default function InterviewRoom({params}: {params: {interview_id: string}}) {    
     const { interview_id } = params;
     const [currentQuestion, setCurrentQuestion] = useState<IGetNextQuestionResponse | undefined>(undefined);
+    const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
     // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
     const followUpQuestionId = useRef<string | null>(null);
     console.log('re rendered');
@@ -19,19 +22,21 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
         getNextQuestion({ user_id: 'test-user-id', interview_id: interview_id }).then((data)=>{
             if (data.is_interview_completed) {
                 setCurrentQuestion(undefined);
+                setIsInterviewCompleted(true);
             } else {
                 setCurrentQuestion(data);
             }
         })
     }
 
-     const handleSubmitAnswer = (answer: string) => {
+     const handleSubmitAnswer = (answer: TUserResponse) => {
         console.log('recieved answer', answer);
         submitAnswer({
             user_id: 'test-user-id',
             interview_id: interview_id,
             question_type: currentQuestion?.question_type ?? QuestionType.INITIAL,
-            user_response: answer,
+            //TODO: Do chagnes in the backend to accept the new format
+            user_response: JSON.stringify(answer),
             follow_up_question_id: followUpQuestionId.current ?? undefined
         }).then((data)=>{
             console.log('recieved data', data);
@@ -49,6 +54,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
                 getNextQuestion({ user_id: 'test-user-id', interview_id: interview_id }).then((data)=>{
                     if (data.is_interview_completed) {
                         setCurrentQuestion(undefined);
+                        setIsInterviewCompleted(true);
                     } else {
                         setCurrentQuestion(data);
                     }
@@ -57,9 +63,14 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
         });
     }
 
-    const handleUserResponse = async (response: string) => {
+    const handleUserResponse = async (response: TUserResponse) => {
         console.log(response);
         handleSubmitAnswer(response);
+    }
+
+    if (isInterviewCompleted) {
+        // redirect to the interview summary page
+        redirect(`/dashboard/interview-room/${interview_id}/summary`);
     }
 
     return (
