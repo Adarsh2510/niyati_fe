@@ -1,4 +1,6 @@
 'use client'
+import 'regenerator-runtime/runtime' 
+
 import { IGetNextQuestionResponse } from "@/lib/api/types";
 import { useState, useRef } from "react";
 import { QuestionType } from "@/constants/questions";

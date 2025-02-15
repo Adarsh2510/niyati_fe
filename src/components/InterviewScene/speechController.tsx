@@ -1,3 +1,4 @@
+
 export const speakQuestion = ({questionText, setIsSpeaking}: {questionText: string, setIsSpeaking: (isSpeaking: boolean) => void}) => {
     
     if (questionText) {
@@ -22,3 +23,4 @@ export const speakQuestion = ({questionText, setIsSpeaking}: {questionText: stri
         window.speechSynthesis.speak(utterance);
     }
 };
+
