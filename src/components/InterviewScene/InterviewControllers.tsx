@@ -4,6 +4,7 @@ import UnSupportedBrowser from "./UnSupportedBrowser";
 import { TUserResponse } from "@/types/interview_room";
 import { userTextResponseAtom } from "./atoms";
 import { useAtomValue } from "jotai";
+import { Button } from "../ui/button";
 
 enum ESubmitBtnStates {
     INITIAL = 'Record Answer',
@@ -11,7 +12,15 @@ enum ESubmitBtnStates {
     ERROR = 'Error',
 }
 
-const InterviewControllers = ({handleNextQuestion, handleUserResponse}: {handleNextQuestion: () => void, handleUserResponse: (response: TUserResponse) => void}) => {
+const InterviewControllers = ({
+    handleNextQuestion, 
+    handleUserResponse,
+    className
+}: {
+    handleNextQuestion: () => void, 
+    handleUserResponse: (response: TUserResponse) => void,
+    className?: string
+}) => {
     const [submitBtnLabel, setSubmitBtnLabel] = useState(ESubmitBtnStates.INITIAL);
     const [isMounted, setIsMounted] = useState(false);
     const userTextResponse = useAtomValue(userTextResponseAtom);
@@ -53,9 +62,21 @@ const InterviewControllers = ({handleNextQuestion, handleUserResponse}: {handleN
     }
 
     return (
-        <div>
-            <button className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600" onClick={handleNextQuestion}>Start Interview</button>
-            <button className={`text-white p-2 rounded-md  ${submitBtnLabel === ESubmitBtnStates.SUBMIT ? 'bg-red-700 hover:bg-red-500' : 'bg-red-500 hover:bg-red-600'}`} onClick={handleSubmitAnswer}>{submitBtnLabel}</button>
+        <div className={`flex gap-4 justify-center ${className}`}>
+            <Button 
+                variant="default" 
+                className="bg-green-500 hover:bg-green-600" 
+                onClick={handleNextQuestion}
+            >
+                Start Interview
+            </Button>
+            <Button
+                variant="destructive"
+                className={submitBtnLabel === ESubmitBtnStates.SUBMIT ? 'bg-red-700 hover:bg-red-500' : 'bg-red-500 hover:bg-red-600'}
+                onClick={handleSubmitAnswer}
+            >
+                {submitBtnLabel}
+            </Button>
         </div>
     )
 }

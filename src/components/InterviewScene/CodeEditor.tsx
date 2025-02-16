@@ -12,6 +12,6 @@ export default function CodeEditor({placeholder}: {placeholder: string}) {
 
 
     return (
-        <CodeMirror value={placeholder} height="43rem" theme={vscodeDark} extensions={[langs.javascript()]} onChange={onChange}/>
+        <CodeMirror value={placeholder} height="44rem" theme={vscodeDark} extensions={[langs.javascript()]} onChange={onChange}/>
     )
 }

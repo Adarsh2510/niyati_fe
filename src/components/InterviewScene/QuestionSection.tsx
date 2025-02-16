@@ -35,8 +35,7 @@ const QuestionSection = ({currentQuestion}: {currentQuestion?: IGetNextQuestionR
 
     return (
         <div>
-            <h1>{questionText}</h1>
-            <div className="w-full bg-cover bg-center h-full relative flex" style={{ backgroundImage: `url('/meeting-room.webp')`, height:"45rem" }}>
+            <div className="w-full bg-cover bg-center h-full relative flex" style={{ backgroundImage: `url('/meeting-room.webp')`, height:"44rem" }}>
                 <div className="h-full w-1/4">
                 <div className="h-1/4 w-full">
                  {/*TODO ADD section name here*/}

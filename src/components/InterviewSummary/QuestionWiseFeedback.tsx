@@ -17,7 +17,7 @@ export function QuestionWiseFeedback({ data }: { data: TQuestionWiseFeedback[] }
                 <h3 className="text-sm text-gray-500">{question.section_name}</h3>
                 <h4 className="text-lg font-semibold">{question.question_name}</h4>
               </div>
-              <div className=" h-12 w-24 flex items-center justify-center">
+              <div className=" h-12 w-26 flex items-center justify-center">
                 <span className="text-blue-700 dark:text-blue-300 font-semibold">
                   {`Score: ${question.score} / 10`}
                 </span>

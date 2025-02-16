@@ -3,6 +3,7 @@ import DashboardHeader from "@/components/common/DashboardHeader";
 import { OverallSummary } from '@/components/InterviewSummary/OverallSummary'
 import { QuestionWiseFeedback } from '@/components/InterviewSummary/QuestionWiseFeedback'
 import { SuggestedInterviews } from '@/components/InterviewSummary/SuggestedInterviews'
+import Footer from "@/components/common/Footer";
 
 export default async function InterviewSummary({params}: {params: {interview_id: string}}) {
     const { interview_id } = params;
@@ -27,6 +28,7 @@ export default async function InterviewSummary({params}: {params: {interview_id:
             />
             <SuggestedInterviews />
             </div>
+            <Footer/>
         </>
     );
 }

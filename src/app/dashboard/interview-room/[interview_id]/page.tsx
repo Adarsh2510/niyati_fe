@@ -9,6 +9,8 @@ import InterviewControllers from "@/components/InterviewScene/InterviewControlle
 import { getNextQuestion, submitAnswer } from "@/lib/api/getInterviewData";
 import { TUserResponse } from '@/types/interview_room'
 import { redirect } from 'next/navigation';
+import DashboardHeader from '@/components/common/DashboardHeader';
+import Footer from '@/components/common/Footer';
 
 export default function InterviewRoom({params}: {params: {interview_id: string}}) {    
     const { interview_id } = params;
@@ -71,12 +73,16 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     if (isInterviewCompleted) {
         redirect(`/dashboard/interview-room/${interview_id}/summary`);
     }
-
     return (
-        <div>
-            <h1>Interview Room</h1>
-            <QuestionSection currentQuestion={currentQuestion}/>
-            <InterviewControllers handleNextQuestion={handleNextQuestion} handleUserResponse={handleUserResponse}/>
+        <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
+            <DashboardHeader />
+            <QuestionSection currentQuestion={currentQuestion} />
+            <InterviewControllers 
+                handleNextQuestion={handleNextQuestion} 
+                handleUserResponse={handleUserResponse}
+                className="p-2 bg-gray-100 border-t"
+            />
+            <Footer />
         </div>
     )
 }
