@@ -69,7 +69,6 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     }
 
     if (isInterviewCompleted) {
-        // redirect to the interview summary page
         redirect(`/dashboard/interview-room/${interview_id}/summary`);
     }
 

@@ -1,6 +1,6 @@
 import { getNiyatiBackendApiUrl } from "@/utils/apiBE";
 import { EBackendEndpoints } from "@/constants/endpoints";
-import { IApiResponse, IGetNextQuestionParams, IGetNextQuestionResponse, ISubmitAnswerRequest, ISubmitAnswerResponse } from "./types";
+import { IApiResponse, IGetNextQuestionParams, IGetNextQuestionResponse, ISubmitAnswerRequest, ISubmitAnswerResponse, TGetInterviewSummaryResponse, TGetInterviewSummaryRequest } from "./types";
 import { sendLog } from "@/utils/logs";
 import { ELogLevels } from "@/constants/logs";
 
@@ -47,5 +47,17 @@ export const submitAnswer = async (params: ISubmitAnswerRequest): Promise<ISubmi
         follow_up_question_id: params.follow_up_question_id ?? null
     }
     const response = await fetchApiData<ISubmitAnswerResponse>(url, 'POST', body);
+    return response.data;
+}
+
+export const getInterviewSummary = async (params: TGetInterviewSummaryRequest): Promise<TGetInterviewSummaryResponse> => {
+    const { interview_id, user_id } = params;
+    const url = getNiyatiBackendApiUrl(EBackendEndpoints.GET_INTERVIEW_SUMMARY)
+    
+    const body = {
+        interview_id,
+        user_id
+    }
+    const response = await fetchApiData<TGetInterviewSummaryResponse>(url, 'POST', body);
     return response.data;
 }

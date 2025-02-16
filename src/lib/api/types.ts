@@ -31,3 +31,30 @@ export interface ISubmitAnswerResponse {
     follow_up_question?: Record<string, IIntQuestions>;
 }
 
+export type TGetInterviewSummaryRequest = {
+    interview_id: string;
+    user_id: string;
+}
+
+export type TOverallFeedback = {
+    summary: string;
+    weak_points: string[];
+    strong_points: string[];
+}
+
+export type TQuestionWiseFeedback = {
+    question_id: string;
+    question_name: string;
+    section_id: string;
+    section_name: string;
+    feedback: string[];
+    weak_points: string[];
+    score: number;
+}
+
+export type TGetInterviewSummaryResponse = {
+    overall_feedback: TOverallFeedback;
+    total_score: number;
+    section_wise_total_score: Record<string, number>;
+    question_wise_feedback: TQuestionWiseFeedback[];
+}
