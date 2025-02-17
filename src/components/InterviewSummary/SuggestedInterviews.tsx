@@ -102,8 +102,12 @@ export function SuggestedInterviews({data, sectionTitle}: TInterviewSuggestionCa
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
+        {data.length > 3 && (
+          <>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </>
+        )}
       </Carousel>
     </div>
   )
