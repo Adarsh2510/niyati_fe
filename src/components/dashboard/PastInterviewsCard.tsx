@@ -9,25 +9,25 @@ async function getPastInterviews() {
       id: "1",
       title: "Frontend Developer Interview",
       date: "Jan 20, 2024",
-      score: 85,
+      score: 8,
     },
     {
       id: "2",
       title: "System Design Discussion",
       date: "Jan 15, 2024",
-      score: 88,
+      score: 8,
     },
     {
       id: "3",
       title: "JavaScript Fundamentals",
       date: "Jan 10, 2024",
-      score: 92,
+      score: 9,
     },
     {
       id: "4",
       title: "React Interview",
       date: "Jan 5, 2024",
-      score: 95,
+      score: 9,
     },
     
   ]

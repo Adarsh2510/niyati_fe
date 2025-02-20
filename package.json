@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^4.1.0",
+    "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@react-three/drei": "^9.121.2",
     "@react-three/fiber": "^8.17.12",
@@ -29,13 +32,15 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
+    "react-hook-form": "^7.54.2",
     "react-speech-recognition": "^3.10.0",
     "recharts": "^2.15.1",
     "regenerator-runtime": "^0.14.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.172.0",
-    "three-stdlib": "^2.35.8"
+    "three-stdlib": "^2.35.8",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^20",
