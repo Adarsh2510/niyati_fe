@@ -1,10 +1,14 @@
+"use client"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Play } from "lucide-react"
-import Link from "next/link"
-
+import { Dialog } from "@/components/common/Dialog"
+import StartInterviewForm from "@/components/InterviewSelectForm"
+import { useState } from "react"
 export function StartInterviewCard() {
+  const [showDialog, setShowDialog] = useState(false);
   return (
+    <>
     <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-950">
       <div className="p-6 pt-12 pb-12">
         <div className="flex flex-col items-start space-y-4">
@@ -19,13 +23,18 @@ export function StartInterviewCard() {
             </p>
           </div>
 
-          <Link href="/interview/new" className="w-full">
-            <Button className="w-full">
+            <Button className="w-full" onClick={() => {
+              setShowDialog(true);
+            }}>
               Start Practice
             </Button>
-          </Link>
         </div>
       </div>
     </Card>
+    <Dialog heading="Start Interview" showDialog={showDialog} onClose={() => {
+      setShowDialog(false);}}>
+      <StartInterviewForm />
+    </Dialog>
+    </>
   )
 } 
