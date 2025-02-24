@@ -4,5 +4,5 @@ export type TUserResponse = {
 }
 
 export type TInterviewRoomResponse = {
-    id: string;
+    interview_id: string;
 }

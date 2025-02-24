@@ -7,9 +7,10 @@ export type TInterviewSelectFormProps = {
   }
 
 export type TInterviewFormValues = {
+    user_id: string;
     role: string;
     experience: string;
     domain: string;
-    language: string;
+    programmingLanguage: string;
     targetCompany: string;
 }

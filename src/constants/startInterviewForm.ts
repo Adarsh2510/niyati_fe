@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { EDomain, EExperience, EProgrammingLanguage, ERole, ETargetCompany } from "./interview"
 
 export const FORM_FIELDS = {
   role: {
@@ -9,10 +10,8 @@ export const FORM_FIELDS = {
       required_error: "Please select a role.",
     }),
     options: [
-      { value: "frontend", label: "Frontend Developer" },
-      { value: "backend", label: "Backend Developer" },
-      { value: "fullstack", label: "Fullstack Developer" },
-      { value: "devops", label: "DevOps Engineer" },
+      { value: ERole.SOFTWARE_ENGINEER, label: "Software Engineer" },
+      { value: ERole.DEVOPS_ENGINEER, label: "DevOps Engineer" },
     ],
   },
   experience: {
@@ -23,9 +22,11 @@ export const FORM_FIELDS = {
       required_error: "Please select experience level.",
     }),
     options: [
-      { value: "entry", label: "Entry Level (0-2 years)" },
-      { value: "mid", label: "Mid Level (2-5 years)" },
-      { value: "senior", label: "Senior Level (5+ years)" },
+      { value: EExperience.INTERN, label: "Entry Level (0-2 years)" },
+      { value: EExperience.JUNIOR, label: "Mid Level (2-5 years)" },
+      { value: EExperience.SENIOR, label: "Senior Level (5+ years)" },
+      { value: EExperience.LEAD, label: "Lead Level (10+ years)" },
+      { value: EExperience.MANAGER, label: "Manager Level (15+ years)" },
     ],
   },
   domain: {
@@ -36,10 +37,9 @@ export const FORM_FIELDS = {
       required_error: "Please select a domain.",
     }),
     options: [
-      { value: "web", label: "Web Development" },
-      { value: "mobile", label: "Mobile Development" },
-      { value: "cloud", label: "Cloud Computing" },
-      { value: "ai", label: "AI/ML" },
+      { value: EDomain.BACKEND, label: "Backend Development" },
+      { value: EDomain.FRONTEND, label: "Frontend Development" },
+      { value: EDomain.FULLSTACK, label: "Fullstack Development" },
     ],
   },
   language: {
@@ -50,10 +50,9 @@ export const FORM_FIELDS = {
       required_error: "Please select a programming language.",
     }),
     options: [
-      { value: "javascript", label: "JavaScript" },
-      { value: "python", label: "Python" },
-      { value: "java", label: "Java" },
-      { value: "csharp", label: "C#" },
+      { value: EProgrammingLanguage.JS, label: "JavaScript" },
+      { value: EProgrammingLanguage.PYTHON, label: "Python" },
+      { value: EProgrammingLanguage.JAVA, label: "Java" },
     ],
   },
   targetCompany: {
@@ -64,10 +63,9 @@ export const FORM_FIELDS = {
       required_error: "Please select a target company.",
     }),
     options: [
-      { value: "google", label: "Google" },
-      { value: "microsoft", label: "Microsoft" },
-      { value: "amazon", label: "Amazon" },
-      { value: "meta", label: "Meta" },
+      { value: ETargetCompany.GOOGLE, label: "Google" },
+      { value: ETargetCompany.MICROSOFT, label: "Microsoft" },
+      { value: ETargetCompany.FACEBOOK, label: "Facebook" },
     ],
   },
 }

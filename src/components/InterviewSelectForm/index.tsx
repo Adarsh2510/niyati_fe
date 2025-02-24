@@ -20,16 +20,53 @@ import {
 } from "@/components/ui/select"
 import { FORM_FIELDS, formSchema } from "@/constants/startInterviewForm"
 import { TInterviewSelectFormProps } from "./types"
-import { z } from "zod"
+import { ArrowRight } from "lucide-react"
+import { Loader } from "@/components/common/loader"
+import { initialzeInterviewForm } from "./util"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+
+type FormValues = {
+  role: string;
+  experience: string;
+  domain: string;
+  language: string;
+  targetCompany: string;
+}
 
 export default function StartInterviewForm(props: TInterviewSelectFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    // TODO: Handle form submission
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  
+  async function onSubmit(values: FormValues) {
+    const { role, experience, domain, language, targetCompany } = values
+    setIsLoading(true)
+    try {
+      const data =  await initialzeInterviewForm({
+        user_id: "test_user_id",
+        role,
+        experience,
+        domain,
+        programmingLanguage: language,
+        targetCompany,
+      })
+        if (!data.interview_id) {
+        toast("Something went wrong, please try again")
+       
+        }
+        console.log("data.interview_room_id", data.interview_id)
+        router.push(`dashboard/interview-room/${data.interview_id}`)
+    } catch (error) {
+      console.error(error)
+      toast("Something went wrong, please try again")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -39,7 +76,7 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
           <FormField
             key={key}
             control={form.control}
-            name={field.name as keyof z.infer<typeof formSchema>}
+            name={field.name as keyof FormValues}
             render={({ field: formField }) => (
               <FormItem>
                 <FormLabel>{field.label}</FormLabel>
@@ -63,7 +100,18 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
           />
         ))}
 
-        <Button type="submit" className="w-full">Start Interview</Button>
+        <Button disabled={isLoading} type="submit" className="w-full">
+          {isLoading ? (
+            <>
+              <span className="mr-2">Please wait while we prepare your interview</span>
+              <Loader />
+            </>
+          ) : (
+            <>
+              Start Interview <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          )}
+        </Button>
       </form>
     </Form>
   )
