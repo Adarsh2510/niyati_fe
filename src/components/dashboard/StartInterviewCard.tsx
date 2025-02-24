@@ -1,7 +1,7 @@
 "use client"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Play } from "lucide-react"
+import { ArrowRight, Play } from "lucide-react"
 import { Dialog } from "@/components/common/Dialog"
 import StartInterviewForm from "@/components/InterviewSelectForm"
 import { useState } from "react"
@@ -26,7 +26,7 @@ export function StartInterviewCard() {
             <Button className="w-full" onClick={() => {
               setShowDialog(true);
             }}>
-              Start Practice
+              Start Practice <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 export const dialogStyles = {
     dialog: `
         w-full max-h-[90vh] overflow-y-auto sm:w-2/3 p-4 relative -z-[51]
+        rounded-lg shadow-lg
         data-[state=open]:animate-in data-[state=closed]:animate-out
         data-[state=open]:duration-300 data-[state=closed]:duration-300
         data-[state=open]:fade-in data-[state=closed]:fade-out

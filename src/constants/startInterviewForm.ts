@@ -72,9 +72,10 @@ export const FORM_FIELDS = {
   },
 }
 
-export const formSchema = z.object(
-  Object.entries(FORM_FIELDS).reduce((acc, [key, field]) => ({
-    ...acc,
-    [key]: field.validation,
-  }), {})
-)
+export const formSchema = z.object({
+  role: z.string(),
+  experience: z.string(),
+  domain: z.string(),
+  language: z.string(),
+  targetCompany: z.string()
+})

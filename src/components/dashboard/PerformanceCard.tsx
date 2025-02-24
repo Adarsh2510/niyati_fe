@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "recharts"
 
-async function getPerformanceData() {
+ function getPerformanceData() {
   // TODO: Replace with actual API call
   return [
     { day: "Mon", score: 75 },
@@ -20,8 +20,8 @@ async function getPerformanceData() {
   ]
 }
 
-export async function PerformanceCard() {
-  const data = await getPerformanceData()
+export function PerformanceCard() {
+  const data =  getPerformanceData()
 
   return (
     <Card className="p-6">
