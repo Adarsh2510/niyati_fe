@@ -75,7 +75,6 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     }
     return (
         <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-            <DashboardHeader />
             <QuestionSection currentQuestion={currentQuestion} />
             <InterviewControllers 
                 handleNextQuestion={handleNextQuestion} 

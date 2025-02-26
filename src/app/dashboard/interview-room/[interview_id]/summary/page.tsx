@@ -70,7 +70,6 @@ export default async function InterviewSummary({params}: {params: {interview_id:
 
     return (
         <>
-            <DashboardHeader />
             <div className="container mx-auto px-4 py-6 space-y-8">
             <OverallSummary 
                 score={total_score}

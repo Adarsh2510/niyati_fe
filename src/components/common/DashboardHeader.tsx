@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import UserMenu from "./UserMenu";
 
 export default function DashboardHeader() {
     return (
@@ -8,10 +11,7 @@ export default function DashboardHeader() {
                     <Image src={require('@/assets/engineer.svg')} alt="logo" width={32} height={32} />
                     <h1 className="text-2xl font-bold">Niyati</h1>
                 </div>
-                <div className="flex items-center gap-2 bg-gray-100 rounded-full p-2">
-                    <Image src={require('@/assets/user.svg')} alt="logo" width={32} height={32} />
-                    <h1 className="text-2xl">John Doe</h1>
-                </div>
+                <UserMenu />
             </div>
         </div>
     );

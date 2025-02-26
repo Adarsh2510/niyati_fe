@@ -1,3 +1,6 @@
+import { getSession } from "next-auth/react";
+import { AuthHeader } from "@/types/auth";
+
 export const getNiyatiBackendApiUrl = (
     endpoint: string,
     params?: { [_key: string]: string }
@@ -8,3 +11,27 @@ export const getNiyatiBackendApiUrl = (
     }
     return url.toString();
 }
+
+export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const session = await getSession();
+    
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string> || {})
+    };
+
+    if (session?.accessToken) {
+        const authHeader: AuthHeader = {
+            Authorization: `Bearer ${session.accessToken}`
+        };
+        
+        Object.assign(headers, authHeader);
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
+
+    return response;
+};

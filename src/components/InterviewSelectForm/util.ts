@@ -1,4 +1,4 @@
-import { getNiyatiBackendApiUrl } from "@/utils/apiBE";
+import { getNiyatiBackendApiUrl, fetchWithAuth } from "@/utils/apiBE";
 import { TInterviewFormValues } from "./types";
 import { TInterviewRoomResponse } from "@/types/interview_room";
 import { EBackendEndpoints } from "@/constants/endpoints";
@@ -6,11 +6,8 @@ import { EBackendEndpoints } from "@/constants/endpoints";
 export const initialzeInterviewForm = async (values: TInterviewFormValues): Promise<TInterviewRoomResponse> => {
   try {
     console.log("initialzeInterviewForm", JSON.stringify(values, null, 2))
-    const response = await fetch(getNiyatiBackendApiUrl(EBackendEndpoints.INITIALIZE_INTERVIEW), {
+    const response = await fetchWithAuth(getNiyatiBackendApiUrl(EBackendEndpoints.INITIALIZE_INTERVIEW), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(values),
     });
 

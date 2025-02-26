@@ -1,9 +1,43 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      Landing Page
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <h1 className="mb-8 text-4xl font-bold">Welcome to Niyati</h1>
+      <p className="mb-8 text-center text-lg">
+        Your AI-powered interview preparation platform
+      </p>
+      <div className="flex gap-4">
+        <Link href="/login">
+          <Button size="lg">Sign In</Button>
+        </Link>
+        <Link href="/signup">
+          <Button size="lg" variant="outline">Create Account</Button>
+        </Link>
+      </div>
+    </main>
   );
 }
