@@ -7,14 +7,15 @@ export enum EExperience {
 }
 
 export enum ERole {
-    SOFTWARE_ENGINEER = "SOFTWARE_ENGINEER",
-    DEVOPS_ENGINEER = "DEVOPS_ENGINEER"
+    BACKEND = "BACKEND",
+    FRONTEND = "FRONTEND",
+    FULLSTACK = "FULLSTACK",
+    DEVOPS = "DEVOPS"
 }
 
 export enum EDomain {
-    BACKEND = "BACKEND",
-    FRONTEND = "FRONTEND",
-    FULLSTACK = "FULLSTACK"
+    SOFTWARE_ENGINEER = "SOFTWARE_ENGINEER",
+    DEVOPS_ENGINEER = "DEVOPS_ENGINEER",
 }
 
 export enum EProgrammingLanguage {
@@ -26,7 +27,8 @@ export enum EProgrammingLanguage {
 export enum ETargetCompany {
     GOOGLE = "GOOGLE",
     MICROSOFT = "MICROSOFT",
-    FACEBOOK = "FACEBOOK"
+    FACEBOOK = "FACEBOOK",
+    AMAZON = "AMAZON"
 }
 
 export enum EQuestionType {

@@ -1,6 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
-
 interface OverallSummaryProps {
   score: number
   summary: string
@@ -86,7 +84,7 @@ export function OverallSummary({
       <Card className="p-6 flex flex-col items-center justify-center">
         <div className="relative w-32 h-32">
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl font-bold">{score}</span>
+            <span className="text-3xl font-bold">{score?.toFixed(2)}</span>
           </div>
           <svg className="w-full h-full transform -rotate-90">
             <circle

@@ -3,14 +3,26 @@ import { EBackendEndpoints } from "@/constants/endpoints";
 import { IApiResponse, IGetNextQuestionParams, IGetNextQuestionResponse, ISubmitAnswerRequest, ISubmitAnswerResponse, TGetInterviewSummaryResponse, TGetInterviewSummaryRequest } from "./types";
 import { sendLog } from "@/utils/logs";
 import { ELogLevels } from "@/constants/logs";
+import { getServerSession } from "next-auth";
+import { getSession } from "next-auth/react";
+import { authOptions } from "@/lib/auth";
 
 const fetchApiData = async <T>(url: string, method: string, body: any): Promise<IApiResponse<T>> => {
     try {
-        const response = await fetch(url, {
-            method: 'POST',
+        // Try server-side session first, then fall back to client-side session
+        let session;
+        try {
+            session = await getServerSession(authOptions);
+        } catch (error) {
+            // If getServerSession fails (client component), fall back to getSession
+            session = await getSession();
+        }
+            const response = await fetch(url, {
+            method: method || 'POST',
             body: JSON.stringify(body),
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(session?.accessToken ? { 'Authorization': `Bearer ${session.accessToken}` } : {})
             }
         });
 
