@@ -6,9 +6,9 @@ import { useSetAtom } from "jotai";
 import { InterviewerAvatar } from "../Avatar";
 import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import CodeEditor from "./CodeEditor";
+import CodeEditor from "./AnswerBoardTools/CodeEditor";
 import { ESolutionType } from "@/constants/interview";
-import WhiteboardCanvas from "./WhiteboardCanvas";
+import WhiteboardCanvas from "./AnswerBoardTools/WhiteboardCanvas";
 import { answerBoardPlaceholders } from "@/constants/interviewSceneLabels";
 function InterviewerAvatarCanvas() {
     // const backgroundImage = useTexture('/meeting-room.webp');

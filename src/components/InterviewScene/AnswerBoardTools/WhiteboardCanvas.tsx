@@ -5,7 +5,7 @@ import { Eraser, Pen, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
-import { optimizeImage } from './AnswerBoardTools/utils';
+import { optimizeImage } from './utils';
 const WhiteboardCanvas = () => {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
