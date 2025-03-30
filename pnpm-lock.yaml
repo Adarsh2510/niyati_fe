@@ -86,6 +86,9 @@ importers:
       react-hook-form:
         specifier: ^7.54.2
         version: 7.54.2(react@18.3.1)
+      react-sketch-canvas:
+        specifier: ^6.2.0
+        version: 6.2.0(react@18.3.1)
       react-speech-recognition:
         specifier: ^3.10.0
         version: 3.10.0(react@18.3.1)
@@ -2868,6 +2871,12 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react-sketch-canvas@6.2.0:
+    resolution: {integrity: sha512-Z56RQN0viV9W3Y+DpZfQMi2lf3pO+UB4l+cMwnx7j7pQ9WHkQwN+qZKVFGANgpjXQMyY42NODF/DXjuKPCMf1w==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16.8'
 
   react-smooth@4.0.4:
     resolution: {integrity: sha512-gnGKTpYwqL0Iii09gHobNolvX4Kiq4PKx6eWBCYYix+8cdw+cGo3do906l1NBPKkSWx1DghC1dlWG9L2uGd61Q==}
@@ -6759,6 +6768,10 @@ snapshots:
       use-sidecar: 1.1.3(@types/react@18.3.18)(react@18.3.1)
     optionalDependencies:
       '@types/react': 18.3.18
+
+  react-sketch-canvas@6.2.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   react-smooth@4.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:

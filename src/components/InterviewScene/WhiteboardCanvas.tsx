@@ -5,7 +5,7 @@ import { Eraser, Pen, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
-
+import { optimizeImage } from './AnswerBoardTools/utils';
 const WhiteboardCanvas = () => {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
@@ -15,8 +15,9 @@ const WhiteboardCanvas = () => {
         if (canvasRef.current) {
             try {
                 const dataUrl = await canvasRef.current.exportImage('jpeg');
+                const optimizedDataUrl = await optimizeImage(dataUrl);
                 const link = document.createElement('a');
-                link.href = dataUrl;
+                link.href = optimizedDataUrl;
                 link.download = 'whiteboard-drawing.jpeg';
                 document.body.appendChild(link);
                 link.click();
