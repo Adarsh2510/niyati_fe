@@ -8,7 +8,7 @@ import { ESolutionType } from "@/constants/interview";
 import QuestionSection from "@/components/InterviewScene/QuestionSection";
 import InterviewControllers from "@/components/InterviewScene/InterviewControllers";
 import { getNextQuestion, submitAnswer } from "@/lib/api/getInterviewData";
-import { TUserResponse } from '@/types/interview_room'
+import { TUserResponse } from '@/lib/api/types'
 import { redirect } from 'next/navigation';
 import DashboardHeader from '@/components/common/DashboardHeader';
 import Footer from '@/components/common/Footer';
@@ -40,8 +40,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
             user_id: 'test-user-id',
             interview_id: interview_id,
             question_type: currentQuestion?.question_type ?? QuestionType.INITIAL,
-            //TODO: Do chagnes in the backend to accept the new format
-            user_response: JSON.stringify(answer),
+            user_response: answer,
             follow_up_question_id: followUpQuestionId.current ?? undefined
         }).then((data)=>{
             console.log('recieved data', data);

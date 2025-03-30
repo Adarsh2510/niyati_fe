@@ -21,11 +21,18 @@ export interface IGetNextQuestionResponse {
     is_last_question: boolean;
     is_interview_completed: boolean;
 }
+
+export type TUserResponse = {
+    audio_response: string, // audio response which is now converted to text
+    text_response?: string, // text response - from code/text editor
+    image_response?: string, // image response from whiteboard - base64 data of image
+    code_response?: string, // code response - from code editor
+}
 export interface ISubmitAnswerRequest {
     user_id: string;
     interview_id: string;
     question_type: QuestionType;
-    user_response: string;
+    user_response: TUserResponse;
     follow_up_question_id?: string; // Optional property
 }
 export interface ISubmitAnswerResponse {
@@ -58,4 +65,8 @@ export type TGetInterviewSummaryResponse = {
     total_score: number;
     section_wise_total_score: Record<string, number>;
     question_wise_feedback: TQuestionWiseFeedback[];
+}
+
+export type TInterviewRoomResponse = {
+    interview_id: string;
 }

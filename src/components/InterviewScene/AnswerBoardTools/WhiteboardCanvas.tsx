@@ -74,7 +74,7 @@ const WhiteboardCanvas = () => {
                     <Save className="h-4 w-4" />
                 </Button>
             </div>
-            <div className="flex-1 bg-white p-2">
+            <div className="flex-1 bg-white p-2 rounded-lg">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     strokeWidth={4}

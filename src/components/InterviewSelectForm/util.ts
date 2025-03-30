@@ -1,6 +1,6 @@
 import { getNiyatiBackendApiUrl, fetchWithAuth } from "@/utils/apiBE";
 import { TInterviewFormValues } from "./types";
-import { TInterviewRoomResponse } from "@/types/interview_room";
+import { TInterviewRoomResponse } from "@/lib/api/types";
 import { EBackendEndpoints } from "@/constants/endpoints";
 
 export const initialzeInterviewForm = async (values: TInterviewFormValues): Promise<TInterviewRoomResponse> => {

@@ -1,7 +1,7 @@
 import { IGetNextQuestionResponse } from "@/lib/api/types";
 import { speakQuestion } from "./speechController";
 import { useEffect, useState } from "react";
-import { isSpeakingAtom } from "./atoms";
+import { isSpeakingAtom } from "./AnswerBoardTools/atoms";
 import { useSetAtom } from "jotai";
 import { InterviewerAvatar } from "../Avatar";
 import { Environment } from "@react-three/drei";
@@ -30,11 +30,15 @@ type TAnswerBoard = {
 const answerBoard = (props: TAnswerBoard) => {
     switch (props.solutionType) {
         case ESolutionType.CODE_SOLUTION:
-            return <CodeEditor placeholder={props.codeEditorPlaceholder ?? ''}/>
+            return (
+                <div className="border-8 rounded-lg border-slate-500/75">
+                    <CodeEditor placeholder={props.codeEditorPlaceholder ?? ''}/>
+                </div>
+            )
         case ESolutionType.WHITEBOARD_IMAGE:
             return <WhiteboardCanvas />
         default:
-            return null
+            return <WhiteboardCanvas />
     }
 }
 const QuestionSection = ({currentQuestion, solutionType}: {currentQuestion?: IGetNextQuestionResponse, solutionType: ESolutionType}) => {
@@ -62,7 +66,7 @@ const QuestionSection = ({currentQuestion, solutionType}: {currentQuestion?: IGe
                     </Canvas>
                 </div>
                 </div>
-                <div className="m-2 w-3/4 border-8 rounded-lg border-slate-500/75 overflow-hidden">
+                <div className="m-2 w-3/4 overflow-hidden">
                     {answerBoard({solutionType, codeEditorPlaceholder: answerBoardPlaceholders[solutionType]})}
                 </div>
             </div>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import UnSupportedBrowser from "./UnSupportedBrowser";
-import { TUserResponse } from "@/types/interview_room";
-import { userTextResponseAtom } from "./atoms";
+import { TUserResponse } from "@/lib/api/types";
+import { userCodeResponseAtom, userImageResponseAtom, userTextResponseAtom } from "./AnswerBoardTools/atoms";
 import { useAtomValue } from "jotai";
 import { Button } from "../ui/button";
 
@@ -24,6 +24,8 @@ const InterviewControllers = ({
     const [submitBtnLabel, setSubmitBtnLabel] = useState(ESubmitBtnStates.INITIAL);
     const [isMounted, setIsMounted] = useState(false);
     const userTextResponse = useAtomValue(userTextResponseAtom);
+    const userImageResponse = useAtomValue(userImageResponseAtom);
+    const userCodeResponse = useAtomValue(userCodeResponseAtom);
 
     const {
         transcript,
@@ -43,8 +45,10 @@ const InterviewControllers = ({
             SpeechRecognition.stopListening();
             console.log('transcript', transcript)
             handleUserResponse({
-                response: transcript,
-                supporting_text_or_code_response: userTextResponse
+                audio_response: transcript,
+                text_response: userTextResponse,
+                image_response: userImageResponse,
+                code_response: userCodeResponse
             })
             resetTranscript();
             setSubmitBtnLabel(ESubmitBtnStates.INITIAL);

@@ -8,7 +8,7 @@ import { useAnimations, useFBX, useGLTF } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import { animations } from '@/constants/interviewer';
 import { useAtomValue } from 'jotai';
-import { isSpeakingAtom } from '../InterviewScene/atoms';
+import { isSpeakingAtom } from '../InterviewScene/AnswerBoardTools/atoms';
 
 export function InterviewerAvatar({...props}) {
   const { scene } = useGLTF('/models/interviewer_avatar.glb')
