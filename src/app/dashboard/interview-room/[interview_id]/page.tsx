@@ -4,6 +4,7 @@ import 'regenerator-runtime/runtime'
 import { IGetNextQuestionResponse } from "@/lib/api/types";
 import { useState, useRef } from "react";
 import { QuestionType } from "@/constants/questions";
+import { ESolutionType } from "@/constants/interview";
 import QuestionSection from "@/components/InterviewScene/QuestionSection";
 import InterviewControllers from "@/components/InterviewScene/InterviewControllers";
 import { getNextQuestion, submitAnswer } from "@/lib/api/getInterviewData";
@@ -16,6 +17,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     const { interview_id } = params;
     const [currentQuestion, setCurrentQuestion] = useState<IGetNextQuestionResponse | undefined>(undefined);
     const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
+    const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
     // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
     const followUpQuestionId = useRef<string | null>(null);
     console.log('re rendered');
@@ -27,6 +29,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
                 setIsInterviewCompleted(true);
             } else {
                 setCurrentQuestion(data);
+                setSolutionType(data.next_question?.solution_type);
             }
         })
     }
@@ -75,7 +78,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
     }
     return (
         <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-            <QuestionSection currentQuestion={currentQuestion} />
+            <QuestionSection currentQuestion={currentQuestion} solutionType={solutionType ?? ESolutionType.TEXT_ANSWER} />
             <InterviewControllers 
                 handleNextQuestion={handleNextQuestion} 
                 handleUserResponse={handleUserResponse}

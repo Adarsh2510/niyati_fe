@@ -35,3 +35,10 @@ export enum EQuestionType {
     INITIAL = "INITIAL",
     FOLLOW_UP = "FOLLOW_UP"
 }
+
+export enum ESolutionType {
+    CODE_SOLUTION = "CODE_SOLUTION",
+    WHITEBOARD_IMAGE = "WHITEBOARD_IMAGE",
+    CODE_REPO_WITH_OUTPUT = "CODE_REPO_WITH_OUTPUT",
+    TEXT_ANSWER = "TEXT_ANSWER",
+}

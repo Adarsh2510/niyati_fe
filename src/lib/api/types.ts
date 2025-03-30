@@ -1,5 +1,5 @@
 import { QuestionType } from "@/constants/questions";
-
+import { ESolutionType } from "@/constants/interview";
 export interface IApiResponse<T> {
     data: T;
     status: number;
@@ -13,6 +13,7 @@ export interface IGetNextQuestionParams {
 export interface IIntQuestions {
     question_name: string;
     question_text: string;
+    solution_type: ESolutionType;
 }
 export interface IGetNextQuestionResponse {
     question_type: QuestionType;

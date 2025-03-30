@@ -10,8 +10,10 @@ export const FORM_FIELDS = {
       required_error: "Please select a role.",
     }),
     options: [
-      { value: ERole.SOFTWARE_ENGINEER, label: "Software Engineer" },
-      { value: ERole.DEVOPS_ENGINEER, label: "DevOps Engineer" },
+      { value: ERole.BACKEND, label: "Backend Engineer" },
+      { value: ERole.FRONTEND, label: "Frontend Engineer" },
+      { value: ERole.FULLSTACK, label: "Fullstack Engineer" },
+      { value: ERole.DEVOPS, label: "DevOps Engineer" },
     ],
   },
   experience: {
@@ -37,9 +39,8 @@ export const FORM_FIELDS = {
       required_error: "Please select a domain.",
     }),
     options: [
-      { value: EDomain.BACKEND, label: "Backend Development" },
-      { value: EDomain.FRONTEND, label: "Frontend Development" },
-      { value: EDomain.FULLSTACK, label: "Fullstack Development" },
+      { value: EDomain.SOFTWARE_ENGINEER, label: "Software Engineer" },
+      { value: EDomain.DEVOPS_ENGINEER, label: "DevOps Engineer" },
     ],
   },
   language: {

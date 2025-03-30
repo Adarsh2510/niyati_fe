@@ -7,7 +7,9 @@ import { InterviewerAvatar } from "../Avatar";
 import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import CodeEditor from "./CodeEditor";
-
+import { ESolutionType } from "@/constants/interview";
+import WhiteboardCanvas from "./WhiteboardCanvas";
+import { answerBoardPlaceholders } from "@/constants/interviewSceneLabels";
 function InterviewerAvatarCanvas() {
     // const backgroundImage = useTexture('/meeting-room.webp');
     // const viewPort = useThree((state: any) => state.viewport);
@@ -21,7 +23,21 @@ function InterviewerAvatarCanvas() {
     )
 }
 
-const QuestionSection = ({currentQuestion}: {currentQuestion?: IGetNextQuestionResponse}) => {
+type TAnswerBoard = {
+    solutionType: ESolutionType;
+    codeEditorPlaceholder?: string;
+}
+const answerBoard = (props: TAnswerBoard) => {
+    switch (props.solutionType) {
+        case ESolutionType.CODE_SOLUTION:
+            return <CodeEditor placeholder={props.codeEditorPlaceholder ?? ''}/>
+        case ESolutionType.WHITEBOARD_IMAGE:
+            return <WhiteboardCanvas />
+        default:
+            return null
+    }
+}
+const QuestionSection = ({currentQuestion, solutionType}: {currentQuestion?: IGetNextQuestionResponse, solutionType: ESolutionType}) => {
     
     const questionText = currentQuestion?.next_question?.question_text;
     const setIsSpeaking = useSetAtom(isSpeakingAtom);
@@ -47,7 +63,7 @@ const QuestionSection = ({currentQuestion}: {currentQuestion?: IGetNextQuestionR
                 </div>
                 </div>
                 <div className="m-2 w-3/4 border-8 rounded-lg border-slate-500/75 overflow-hidden">
-                    <CodeEditor placeholder={codeEditorPlaceholder}/>
+                    {answerBoard({solutionType, codeEditorPlaceholder: answerBoardPlaceholders[solutionType]})}
                 </div>
             </div>
         </div>
