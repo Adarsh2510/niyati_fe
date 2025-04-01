@@ -10,6 +10,7 @@ import CodeEditor from "./AnswerBoardTools/CodeEditor";
 import { ESolutionType } from "@/constants/interview";
 import WhiteboardCanvas from "./AnswerBoardTools/WhiteboardCanvas";
 import { answerBoardPlaceholders } from "@/constants/interviewSceneLabels";
+import { toast } from "sonner";
 function InterviewerAvatarCanvas() {
     // const backgroundImage = useTexture('/meeting-room.webp');
     // const viewPort = useThree((state: any) => state.viewport);
@@ -29,16 +30,15 @@ type TAnswerBoard = {
 }
 const answerBoard = (props: TAnswerBoard) => {
     switch (props.solutionType) {
-        case ESolutionType.CODE_SOLUTION:
+        case ESolutionType.WHITEBOARD_IMAGE:
+            toast.info('Please do not forget to save your whiteboard image before submitting your response.')
+            return <WhiteboardCanvas />
+        default:
             return (
                 <div className="border-8 rounded-lg border-slate-500/75">
                     <CodeEditor placeholder={props.codeEditorPlaceholder ?? ''}/>
                 </div>
             )
-        case ESolutionType.WHITEBOARD_IMAGE:
-            return <WhiteboardCanvas />
-        default:
-            return <WhiteboardCanvas />
     }
 }
 const QuestionSection = ({currentQuestion, solutionType}: {currentQuestion?: IGetNextQuestionResponse, solutionType: ESolutionType}) => {

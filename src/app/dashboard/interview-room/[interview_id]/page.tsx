@@ -29,7 +29,7 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
                 setIsInterviewCompleted(true);
             } else {
                 setCurrentQuestion(data);
-                setSolutionType(data.next_question?.solution_type);
+                setSolutionType(data.solution_type);
             }
         })
     }
@@ -50,7 +50,8 @@ export default function InterviewRoom({params}: {params: {interview_id: string}}
                     question_type: QuestionType.FOLLOW_UP,
                     next_question: Object.values(data.follow_up_question)[0],
                     is_last_question: false,
-                    is_interview_completed: false
+                    is_interview_completed: false,
+                    solution_type: currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER
                 });
             }
             else{

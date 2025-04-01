@@ -12,13 +12,17 @@ export const getNiyatiBackendApiUrl = (
     return url.toString();
 }
 
-export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+export const fetchWithAuth = async (url: string, options: RequestInit = {}, isFormData: boolean = false) => {
     const session = await getSession();
     
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
         ...(options.headers as Record<string, string> || {})
     };
+
+    // Only set Content-Type for JSON requests
+    if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     if (session?.accessToken) {
         const authHeader: AuthHeader = {

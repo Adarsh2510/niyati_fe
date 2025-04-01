@@ -3,6 +3,7 @@ import { ELogLevels } from "@/constants/logs";
 type TLog = {
     err: Error;
     level: (typeof ELogLevels)[keyof typeof ELogLevels];
+    message?: string;
   };
 export const sendLog = async (log: TLog) => {
     //TODO: Implement sentry or corologix here

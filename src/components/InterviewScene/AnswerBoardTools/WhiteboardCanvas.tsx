@@ -5,25 +5,24 @@ import { Eraser, Pen, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
-import { optimizeImage } from './utils';
+import { uploadImage } from '@/lib/services/cloudinary';
+import { userImageResponseAtom } from './atoms';
+import { useSetAtom } from 'jotai';
+
 const WhiteboardCanvas = () => {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
     const [color, setColor] = useState('#000000');
+    const setUserImageResponse = useSetAtom(userImageResponseAtom);
 
     const handleSave = async () => {
         if (canvasRef.current) {
             try {
                 const dataUrl = await canvasRef.current.exportImage('jpeg');
-                const optimizedDataUrl = await optimizeImage(dataUrl);
-                const link = document.createElement('a');
-                link.href = optimizedDataUrl;
-                link.download = 'whiteboard-drawing.jpeg';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                const imageUrl = await uploadImage(new File([dataUrl], 'whiteboard.jpeg', { type: 'image/jpeg' }), `whiteboard_response-${Date.now()+Math.random().toString(36).substring(0, 8)}`);
+                setUserImageResponse(imageUrl);
+                toast.success('Whiteboard image saved successfully !');
             } catch (error) {
-                sendLog({err: error as Error, level: ELogLevels.Error});
                 toast.error('Error saving image, Please try again !');
             }
         }

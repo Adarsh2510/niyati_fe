@@ -13,13 +13,13 @@ export interface IGetNextQuestionParams {
 export interface IIntQuestions {
     question_name: string;
     question_text: string;
-    solution_type: ESolutionType;
 }
 export interface IGetNextQuestionResponse {
     question_type: QuestionType;
     next_question: IIntQuestions | null;
     is_last_question: boolean;
     is_interview_completed: boolean;
+    solution_type: ESolutionType;
 }
 
 export type TUserResponse = {
