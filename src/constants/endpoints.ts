@@ -4,3 +4,8 @@ export enum EBackendEndpoints {
     SUBMIT_ANSWER = '/api/v1/submit-answer',
     GET_INTERVIEW_SUMMARY = '/api/v1/get-interview-summary'
 }
+
+export enum EJudge0Endpoints {
+    SUBMIT_CODE = '/submissions',
+    GET_SUBMISSION_RESULT = '/submissions/'
+}
