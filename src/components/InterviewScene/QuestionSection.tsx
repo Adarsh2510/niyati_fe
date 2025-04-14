@@ -65,7 +65,7 @@ const QuestionSection = ({
       >
         <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{questionText}</div>
         <div className="col-start-1 col-end-2 row-start-2 row-end-3">
-          <Canvas shadows camera={{ position: [0, 0, 8], fov: 30 }}>
+          <Canvas shadows camera={{ position: [0, 0, 5.5], fov: 40 }}>
             <InterviewerAvatarCanvas />
           </Canvas>
         </div>
