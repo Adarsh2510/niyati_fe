@@ -1,13 +1,9 @@
-"use client";
+'use client';
 
-import { ProtectedComponent } from "@/components/ProtectedComponent";
-import DashboardHeader from "@/components/common/DashboardHeader";
+import { ProtectedComponent } from '@/components/ProtectedComponent';
+import DashboardHeader from '@/components/common/DashboardHeader';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedComponent>
       <div className="flex min-h-screen flex-col">
@@ -16,4 +12,4 @@ export default function DashboardLayout({
       </div>
     </ProtectedComponent>
   );
-} 
+}

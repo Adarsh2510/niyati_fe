@@ -8,20 +8,21 @@ import { fetchWithAuth } from '@/utils/apiBE';
  * @param filename - The filename to use for the image
  * @returns The URL of the uploaded image
  */
-export async function uploadImage(
-  file: File,
-  filename: string
-): Promise<string> {
+export async function uploadImage(file: File, filename: string): Promise<string> {
   try {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('filename', filename);
 
     // Use fetchWithAuth utility which handles auth token automatically
-    const response = await fetchWithAuth('/api/cloudinary', {
-      method: 'POST',
+    const response = await fetchWithAuth(
+      '/api/cloudinary',
+      {
+        method: 'POST',
         body: formData,
-    }, true);
+      },
+      true
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -31,7 +32,7 @@ export async function uploadImage(
     const data = await response.json();
     return data.url;
   } catch (error) {
-    sendLog({err: error as Error, level: ELogLevels.Error});
+    sendLog({ err: error as Error, level: ELogLevels.Error });
     throw new Error('Failed to upload image');
   }
 }
@@ -56,7 +57,7 @@ export async function deleteImage(publicId: string): Promise<void> {
       throw new Error(error.error || 'Failed to delete image');
     }
   } catch (error) {
-    sendLog({err: error as Error, level: ELogLevels.Error});
+    sendLog({ err: error as Error, level: ELogLevels.Error });
     throw new Error('Failed to delete image');
   }
 }
@@ -68,4 +69,4 @@ export async function deleteImage(publicId: string): Promise<void> {
  */
 export function getImageUrl(publicId: string): string {
   return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/v1/interview-room/${publicId}`;
-} 
+}

@@ -1,53 +1,53 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { registerUser } from "@/lib/auth";
-import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
-import { RegisterRequest } from "@/types/auth";
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { registerUser } from '@/lib/auth';
+import Link from 'next/link';
+import { signIn, useSession } from 'next-auth/react';
+import { RegisterRequest } from '@/types/auth';
 
 export default function SignupPage() {
   const router = useRouter();
   const { status } = useSession();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
   const [formData, setFormData] = useState<RegisterRequest & { confirmPassword: string }>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       router.push(callbackUrl);
     }
   }, [status, router, callbackUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error('Passwords do not match');
       return;
     }
-    
+
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
@@ -60,13 +60,13 @@ export default function SignupPage() {
         email: formData.email,
         password: formData.password,
       };
-      
+
       await registerUser(registerData);
 
-      toast.success("Account created successfully");
-      
+      toast.success('Account created successfully');
+
       // Automatically sign in the user
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
@@ -74,20 +74,20 @@ export default function SignupPage() {
       });
 
       if (result?.error) {
-        toast.error("Failed to sign in automatically. Please log in manually.");
+        toast.error('Failed to sign in automatically. Please log in manually.');
         setIsLoading(false);
-        router.push("/login");
+        router.push('/login');
       }
       // The useEffect hook will handle redirection once the session is established
     } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "Failed to create account");
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Failed to create account');
       setIsLoading(false);
     }
   };
 
   // If already loading the session or redirecting, show loading state
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-lg">Loading...</p>
@@ -157,15 +157,11 @@ export default function SignupPage() {
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating Account..." : "Sign Up"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            Already have an account?{' '}
             <Link href="/login" className="text-blue-600 hover:underline">
               Sign in
             </Link>
@@ -174,4 +170,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-} 
+}

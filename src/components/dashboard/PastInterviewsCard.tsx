@@ -1,46 +1,45 @@
-import { Card } from "@/components/ui/card"
-import Link from "next/link"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card } from '@/components/ui/card';
+import Link from 'next/link';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 async function getPastInterviews() {
   // TODO: Replace with actual API call
   return [
     {
-      id: "1",
-      title: "Frontend Developer Interview",
-      date: "Jan 20, 2024",
+      id: '1',
+      title: 'Frontend Developer Interview',
+      date: 'Jan 20, 2024',
       score: 8,
     },
     {
-      id: "2",
-      title: "System Design Discussion",
-      date: "Jan 15, 2024",
+      id: '2',
+      title: 'System Design Discussion',
+      date: 'Jan 15, 2024',
       score: 8,
     },
     {
-      id: "3",
-      title: "JavaScript Fundamentals",
-      date: "Jan 10, 2024",
+      id: '3',
+      title: 'JavaScript Fundamentals',
+      date: 'Jan 10, 2024',
       score: 9,
     },
     {
-      id: "4",
-      title: "React Interview",
-      date: "Jan 5, 2024",
+      id: '4',
+      title: 'React Interview',
+      date: 'Jan 5, 2024',
       score: 9,
     },
-    
-  ]
+  ];
 }
 
 export async function PastInterviewsCard() {
-  const interviews = await getPastInterviews()
+  const interviews = await getPastInterviews();
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-4">Past Interviews</h2>
       <ScrollArea className="h-[200px] w-full pr-4">
         <div>
-          {interviews.map((interview) => (
+          {interviews.map(interview => (
             <Link
               key={interview.id}
               href={`/dashboard/interview-room/${interview.id}/summary`}
@@ -53,7 +52,7 @@ export async function PastInterviewsCard() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium">
-                    {Math.round((interview.score/10)*100)}%
+                    {Math.round((interview.score / 10) * 100)}%
                   </span>
                 </div>
               </div>
@@ -62,5 +61,5 @@ export async function PastInterviewsCard() {
         </div>
       </ScrollArea>
     </Card>
-  )
-} 
+  );
+}

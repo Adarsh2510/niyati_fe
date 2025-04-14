@@ -1,37 +1,37 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import Link from "next/link";
-import { LoginRequest } from "@/types/auth";
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { LoginRequest } from '@/types/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const { status } = useSession();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
   const [loginData, setLoginData] = useState<LoginRequest>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === 'authenticated') {
       router.push(callbackUrl);
     }
   }, [status, router, callbackUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginData((prev) => ({ ...prev, [name]: value }));
+    setLoginData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +39,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email: loginData.email,
         password: loginData.password,
         redirect: false,
@@ -47,22 +47,22 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("Invalid credentials");
+        toast.error('Invalid credentials');
         setIsLoading(false);
         return;
       }
 
-      toast.success("Logged in successfully");
+      toast.success('Logged in successfully');
       // The useEffect hook will handle redirection once the session is established
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred during login");
+      console.error('Login error:', error);
+      toast.error('An error occurred during login');
       setIsLoading(false);
     }
   };
 
   // If already loading the session or redirecting, show loading state
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-lg">Loading...</p>
@@ -106,15 +106,11 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Signing in..." : "Sign in"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{" "}
+            Don't have an account?{' '}
             <Link href="/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
@@ -123,4 +119,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

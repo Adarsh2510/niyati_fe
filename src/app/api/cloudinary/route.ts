@@ -43,14 +43,11 @@ function isRateLimited(ip: string): boolean {
 // Helper function to check authentication
 async function checkAuth() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: 'Unauthorized - Please sign in' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized - Please sign in' }, { status: 401 });
   }
-  
+
   return null; // null means auth is successful
 }
 
@@ -61,7 +58,7 @@ export async function POST(request: NextRequest) {
     if (authError) return authError;
 
     const ip = request.ip ?? 'unknown';
-    
+
     // Rate limiting check
     if (isRateLimited(ip)) {
       return NextResponse.json(
@@ -75,26 +72,17 @@ export async function POST(request: NextRequest) {
     const filename = formData.get('filename') as string;
 
     if (!file || !filename) {
-      return NextResponse.json(
-        { error: 'File and filename are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File and filename are required' }, { status: 400 });
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'Only image files are allowed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
     }
 
     // Validate file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File size must be less than 5MB' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
     // Convert File to Buffer
@@ -102,25 +90,28 @@ export async function POST(request: NextRequest) {
 
     // Upload to Cloudinary
     const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          public_id: filename,
-          folder: 'interview-room',
-        },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          {
+            public_id: filename,
+            folder: 'interview-room',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        )
+        .end(buffer);
     });
 
     return NextResponse.json({ url: result.secure_url });
   } catch (error) {
-    sendLog({err: error as Error, level: ELogLevels.Error, message: 'Error in Cloudinary upload'});
-    return NextResponse.json(
-      { error: 'Failed to upload image' },
-      { status: 500 }
-    );
+    sendLog({
+      err: error as Error,
+      level: ELogLevels.Error,
+      message: 'Error in Cloudinary upload',
+    });
+    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
   }
 }
 
@@ -131,7 +122,7 @@ export async function DELETE(request: NextRequest) {
     if (authError) return authError;
 
     const ip = request.ip ?? 'unknown';
-    
+
     // Rate limiting check
     if (isRateLimited(ip)) {
       return NextResponse.json(
@@ -143,19 +134,17 @@ export async function DELETE(request: NextRequest) {
     const { publicId } = await request.json();
 
     if (!publicId) {
-      return NextResponse.json(
-        { error: 'Public ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Public ID is required' }, { status: 400 });
     }
 
     await cloudinary.uploader.destroy(publicId);
     return NextResponse.json({ success: true });
   } catch (error) {
-    sendLog({err: error as Error, level: ELogLevels.Error, message: 'Error in Cloudinary delete'});
-    return NextResponse.json(
-      { error: 'Failed to delete image' },
-      { status: 500 }
-    );
+    sendLog({
+      err: error as Error,
+      level: ELogLevels.Error,
+      message: 'Error in Cloudinary delete',
+    });
+    return NextResponse.json({ error: 'Failed to delete image' }, { status: 500 });
   }
-} 
+}

@@ -1,153 +1,157 @@
-import { Suspense } from "react"
-import DashboardHeader from "@/components/common/DashboardHeader"
-import { StartInterviewCard } from "@/components/dashboard/StartInterviewCard"
-import { PerformanceCard } from "@/components/dashboard/PerformanceCard"
-import { PastInterviewsCard } from "@/components/dashboard/PastInterviewsCard"
-import Footer from "@/components/common/Footer"
-import { SuggestedInterviews, TInterviewSuggestionCard } from "@/components/InterviewSummary/SuggestedInterviews"
-import { BarChart, ChartArea, Clock, Layout, TreePine } from "lucide-react"
-import { Code } from "lucide-react"
+import { Suspense } from 'react';
+import DashboardHeader from '@/components/common/DashboardHeader';
+import { StartInterviewCard } from '@/components/dashboard/StartInterviewCard';
+import { PerformanceCard } from '@/components/dashboard/PerformanceCard';
+import { PastInterviewsCard } from '@/components/dashboard/PastInterviewsCard';
+import Footer from '@/components/common/Footer';
+import {
+  SuggestedInterviews,
+  TInterviewSuggestionCard,
+} from '@/components/InterviewSummary/SuggestedInterviews';
+import { BarChart, ChartArea, Clock, Layout, TreePine } from 'lucide-react';
+import { Code } from 'lucide-react';
 
-const companySpecificInterviews:TInterviewSuggestionCard[] = [
+const companySpecificInterviews: TInterviewSuggestionCard[] = [
   {
-    title: "TechCorp",
-    subTitle: "Full Stack",
-    textLogo: "TC",
-    difficulty: "Medium",
-    link: "/",
+    title: 'TechCorp',
+    subTitle: 'Full Stack',
+    textLogo: 'TC',
+    difficulty: 'Medium',
+    link: '/',
   },
   {
-    title: "Innovative Solutions",
-      subTitle: "Frontend Developer",
-    textLogo: "IS",
-    difficulty: "Medium",
-    link: "/",
+    title: 'Innovative Solutions',
+    subTitle: 'Frontend Developer',
+    textLogo: 'IS',
+    difficulty: 'Medium',
+    link: '/',
   },
   {
-    title: "Creative Minds",
-    subTitle: "Backend Developer",
-    textLogo: "CM",
-    difficulty: "Medium",
-    link: "/",
-  }]
+    title: 'Creative Minds',
+    subTitle: 'Backend Developer',
+    textLogo: 'CM',
+    difficulty: 'Medium',
+    link: '/',
+  },
+];
 
-const suggestedInterviewsData:TInterviewSuggestionCard[] = [
+const suggestedInterviewsData: TInterviewSuggestionCard[] = [
   {
-    title: "Frontend Developer Interview",
-    subTitle: "Tech Corp",
-    difficulty: "Intermediate",
+    title: 'Frontend Developer Interview',
+    subTitle: 'Tech Corp',
+    difficulty: 'Intermediate',
     descriptors: [
       {
-        title: "60 mins",
+        title: '60 mins',
         icon: Clock,
-      }
+      },
     ],
     icon: BarChart,
-    link: "/",
+    link: '/',
   },
   {
-    title: "System Design Interview",
-    subTitle: "StartUp Inc",
-    difficulty: "Advanced",
+    title: 'System Design Interview',
+    subTitle: 'StartUp Inc',
+    difficulty: 'Advanced',
     descriptors: [
       {
-        title: "45 mins",
+        title: '45 mins',
         icon: Clock,
-      }
+      },
     ],
     icon: Layout,
-    link: "/",
+    link: '/',
   },
   {
-    title: "Data Structures & Algorithms",
-    subTitle: "Tech Giants",
-    difficulty: "Advanced",
+    title: 'Data Structures & Algorithms',
+    subTitle: 'Tech Giants',
+    difficulty: 'Advanced',
     descriptors: [
       {
-        title: "90 mins",
+        title: '90 mins',
         icon: Clock,
-      }
+      },
     ],
     icon: TreePine,
-    link: "/",
+    link: '/',
   },
   {
-    title: "Data Structures & Algorithms",
-    subTitle: "Tech Giants",
-    difficulty: "Advanced",
+    title: 'Data Structures & Algorithms',
+    subTitle: 'Tech Giants',
+    difficulty: 'Advanced',
     descriptors: [
       {
-        title: "90 mins",
+        title: '90 mins',
         icon: Clock,
-      }
+      },
     ],
     icon: TreePine,
-    link: "/",
-  }
-]
+    link: '/',
+  },
+];
 
-const roleInterviewData:TInterviewSuggestionCard[] = [
+const roleInterviewData: TInterviewSuggestionCard[] = [
   {
-    title: "Frontend Developer",
-    subTitle: "Software Engineer",
-    descriptors:[
+    title: 'Frontend Developer',
+    subTitle: 'Software Engineer',
+    descriptors: [
       {
-        title:"25 questions",
+        title: '25 questions',
         icon: Code,
       },
       {
-        title:"2 hours",
+        title: '2 hours',
         icon: Clock,
       },
       {
-        title: "Medium",
+        title: 'Medium',
         icon: ChartArea,
-      }
+      },
     ],
     icon: Code,
-    link: "/",
-  },
-    {
-      title: "Backend Developer",
-      subTitle: "Software Engineer",
-      descriptors:[
-        {
-          title:"30 questions",
-          icon: Code,
-        },
-        {
-          title:"2.5 hours",
-          icon: Clock,
-        },
-        {
-          title: "Medium",
-          icon: ChartArea,
-        }
-      ],
-      icon: Code,
-      link: "/",
+    link: '/',
   },
   {
-    title: "Full Stack Developer",
-    subTitle: "Software Engineer",
-    descriptors:[
+    title: 'Backend Developer',
+    subTitle: 'Software Engineer',
+    descriptors: [
       {
-        title:"40 questions",
+        title: '30 questions',
         icon: Code,
       },
       {
-        title:"3 hours",
+        title: '2.5 hours',
         icon: Clock,
       },
       {
-        title: "Medium",
+        title: 'Medium',
         icon: ChartArea,
-      }
+      },
     ],
     icon: Code,
-    link: "/",
-  }
-]
+    link: '/',
+  },
+  {
+    title: 'Full Stack Developer',
+    subTitle: 'Software Engineer',
+    descriptors: [
+      {
+        title: '40 questions',
+        icon: Code,
+      },
+      {
+        title: '3 hours',
+        icon: Clock,
+      },
+      {
+        title: 'Medium',
+        icon: ChartArea,
+      },
+    ],
+    icon: Code,
+    link: '/',
+  },
+];
 
 export default async function DashboardPage() {
   return (
@@ -165,7 +169,7 @@ export default async function DashboardPage() {
 
         <div className="space-y-8">
           <Suspense fallback={<div>Loading...</div>}>
-            <SuggestedInterviews 
+            <SuggestedInterviews
               sectionTitle="Recommended for you"
               data={suggestedInterviewsData}
             />
@@ -173,7 +177,7 @@ export default async function DashboardPage() {
         </div>
         <div className="space-y-8">
           <Suspense fallback={<div>Loading...</div>}>
-            <SuggestedInterviews 
+            <SuggestedInterviews
               sectionTitle="Try out Role Specific Interviews"
               data={roleInterviewData}
             />
@@ -181,7 +185,7 @@ export default async function DashboardPage() {
         </div>
         <div className="space-y-8">
           <Suspense fallback={<div>Loading...</div>}>
-            <SuggestedInterviews 
+            <SuggestedInterviews
               sectionTitle="Challenge Yourself with Company Specific Interviews"
               data={companySpecificInterviews}
             />
@@ -190,6 +194,5 @@ export default async function DashboardPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
-

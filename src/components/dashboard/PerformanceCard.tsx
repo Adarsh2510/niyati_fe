@@ -1,27 +1,20 @@
-"use client"
-import { Card } from "@/components/ui/card"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts"
+'use client';
+import { Card } from '@/components/ui/card';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
- function getPerformanceData() {
+function getPerformanceData() {
   // TODO: Replace with actual API call
   return [
-    { day: "Mon", score: 75 },
-    { day: "Tue", score: 80 },
-    { day: "Wed", score: 85 },
-    { day: "Thu", score: 82 },
-    { day: "Fri", score: 87 },
-  ]
+    { day: 'Mon', score: 75 },
+    { day: 'Tue', score: 80 },
+    { day: 'Wed', score: 85 },
+    { day: 'Thu', score: 82 },
+    { day: 'Fri', score: 87 },
+  ];
 }
 
 export function PerformanceCard() {
-  const data =  getPerformanceData()
+  const data = getPerformanceData();
 
   return (
     <Card className="p-6">
@@ -29,13 +22,7 @@ export function PerformanceCard() {
       <div className="h-[200px] w-full -ml-8">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis 
-              dataKey="day" 
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-            />
+            <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis
               stroke="#888888"
               fontSize={12}
@@ -50,11 +37,11 @@ export function PerformanceCard() {
               dataKey="score"
               stroke="#2563eb"
               strokeWidth={2}
-              dot={{ fill: "#2563eb" }}
+              dot={{ fill: '#2563eb' }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
     </Card>
-  )
-} 
+  );
+}

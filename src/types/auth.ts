@@ -74,4 +74,4 @@ export interface JWTType {
 
 export interface AuthHeader {
   Authorization: string;
-} 
+}

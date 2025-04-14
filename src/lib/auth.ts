@@ -1,10 +1,10 @@
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { getNiyatiBackendApiUrl } from "@/utils/apiBE";
-import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse } from "@/types/auth";
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { getNiyatiBackendApiUrl } from '@/utils/apiBE';
+import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse } from '@/types/auth';
 
 // Extend the types
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     accessToken?: string;
     user: {
@@ -12,9 +12,9 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-    }
+    };
   }
-  
+
   interface User {
     id: string;
     name?: string;
@@ -23,7 +23,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     accessToken?: string;
     id?: string;
@@ -43,14 +43,12 @@ export const registerUser = async (userData: RegisterRequest): Promise<RegisterR
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(
-        errorData?.message || `Registration failed with status: ${response.status}`
-      );
+      throw new Error(errorData?.message || `Registration failed with status: ${response.status}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error('Registration error:', error);
     throw error;
   }
 };
@@ -58,10 +56,10 @@ export const registerUser = async (userData: RegisterRequest): Promise<RegisterR
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -90,14 +88,14 @@ export const authOptions: NextAuthOptions = {
           const user: LoginResponse = await response.json();
           return user;
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error('Authentication error:', error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -120,8 +118,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: '/login',
+    error: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

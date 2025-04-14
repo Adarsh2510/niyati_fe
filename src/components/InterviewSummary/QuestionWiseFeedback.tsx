@@ -1,9 +1,6 @@
-
-import { Card } from "@/components/ui/card"
-import { TQuestionWiseFeedback } from "@/lib/api/types"
-import Conditional from "@/components/Conditional"
-
-
+import { Card } from '@/components/ui/card';
+import { TQuestionWiseFeedback } from '@/lib/api/types';
+import Conditional from '@/components/Conditional';
 
 export function QuestionWiseFeedback({ data }: { data: TQuestionWiseFeedback[] }) {
   return (
@@ -29,27 +26,27 @@ export function QuestionWiseFeedback({ data }: { data: TQuestionWiseFeedback[] }
                 <div>
                   <h5 className="font-semibold mb-2">Feedback</h5>
                   <ul className="space-y-1">
-                  {question.feedback.map((point, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2">✓</span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    {question.feedback.map((point, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <span className="text-green-500 mr-2">✓</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </Conditional>
 
               <Conditional if={question.weak_points.length > 0}>
                 <div className="bg-red-50 p-4 rounded-md">
                   <h5 className="font-semibold mb-2">Areas to Improve</h5>
                   <ul className="space-y-1">
-                  {question.weak_points.map((point, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className=" mr-2">⚠️</span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
+                    {question.weak_points.map((point, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <span className=" mr-2">⚠️</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </Conditional>
             </div>
@@ -57,5 +54,5 @@ export function QuestionWiseFeedback({ data }: { data: TQuestionWiseFeedback[] }
         ))}
       </div>
     </div>
-  )
-} 
+  );
+}

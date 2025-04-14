@@ -1,5 +1,5 @@
-import { EJudge0Endpoints } from "@/constants/endpoints";
-import { EProgrammingLanguages, SUPPORTED_LANGUAGES_CODES } from "@/constants/programmingLanguages";
+import { EJudge0Endpoints } from '@/constants/endpoints';
+import { EProgrammingLanguages, SUPPORTED_LANGUAGES_CODES } from '@/constants/programmingLanguages';
 
 interface Judge0Submission {
   source_code: string;
@@ -26,7 +26,15 @@ interface Judge0Result {
 const JUDGE0_API_URL = process.env.NEXT_PUBLIC_JUDGE0_API_URL || 'https://judge0-ce.p.rapidapi.com';
 const JUDGE0_API_KEY = process.env.NEXT_PUBLIC_JUDGE0_API_KEY;
 
-export const submitCode = async ({code, language, input}: {code: string, language: EProgrammingLanguages, input?: string}): Promise<string> => {
+export const submitCode = async ({
+  code,
+  language,
+  input,
+}: {
+  code: string;
+  language: EProgrammingLanguages;
+  input?: string;
+}): Promise<string> => {
   if (!JUDGE0_API_KEY) {
     throw new Error('Judge0 API key is not configured');
   }
@@ -63,16 +71,19 @@ export const getSubmissionResult = async (token: string): Promise<Judge0Result> 
     throw new Error('Judge0 API key is not configured');
   }
 
-  const response = await fetch(`${JUDGE0_API_URL}${EJudge0Endpoints.GET_SUBMISSION_RESULT}${token}`, {
-    headers: {
-      'X-RapidAPI-Key': JUDGE0_API_KEY,
-      'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-    },
-  });
+  const response = await fetch(
+    `${JUDGE0_API_URL}${EJudge0Endpoints.GET_SUBMISSION_RESULT}${token}`,
+    {
+      headers: {
+        'X-RapidAPI-Key': JUDGE0_API_KEY,
+        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error('Failed to get submission result');
   }
 
   return response.json();
-}; 
+};
