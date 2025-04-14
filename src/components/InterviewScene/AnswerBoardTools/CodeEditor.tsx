@@ -12,6 +12,16 @@ export default function CodeEditor({placeholder}: {placeholder: string}) {
 
 
     return (
-        <CodeMirror value={placeholder} height="44rem" theme={vscodeDark} extensions={[langs.javascript()]} onChange={onChange}/>
+        <div className="h-full w-full flex flex-col">
+            <CodeMirror 
+                value={placeholder} 
+                height="100%" 
+                width="100%" 
+                theme={vscodeDark} 
+                extensions={[langs.javascript()]} 
+                onChange={onChange}
+                className="flex-1"
+            />
+        </div>
     )
 }

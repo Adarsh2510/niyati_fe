@@ -11,6 +11,7 @@ import { ESolutionType } from "@/constants/interview";
 import WhiteboardCanvas from "./AnswerBoardTools/WhiteboardCanvas";
 import { answerBoardPlaceholders } from "@/constants/interviewSceneLabels";
 import { toast } from "sonner";
+import JudgeCodeEditor from "./AnswerBoardTools/JudgeCodeEditor";
 function InterviewerAvatarCanvas() {
     // const backgroundImage = useTexture('/meeting-room.webp');
     // const viewPort = useThree((state: any) => state.viewport);
@@ -35,9 +36,7 @@ const answerBoard = (props: TAnswerBoard) => {
             return <WhiteboardCanvas />
         default:
             return (
-                <div className="border-8 rounded-lg border-slate-500/75">
-                    <CodeEditor placeholder={props.codeEditorPlaceholder ?? ''}/>
-                </div>
+                    <JudgeCodeEditor initialCode={props.codeEditorPlaceholder ?? ''}/>
             )
     }
 }
@@ -54,23 +53,21 @@ const QuestionSection = ({currentQuestion, solutionType}: {currentQuestion?: IGe
     }, [questionText])
 
     return (
-        <div>
-            <div className="w-full bg-cover bg-center h-full relative flex" style={{ backgroundImage: `url('/meeting-room.webp')`, height:"44rem" }}>
-                <div className="h-full w-1/4">
-                <div className="h-1/4 w-full">
-                 {/*TODO ADD section name here*/}
+        <>
+            <div className="h-[85vh] grid grid-cols-[1fr_3fr] grid-rows-[1fr_1fr]" style={{ backgroundImage: `url('/meeting-room.webp')`}}>
+                <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">
+                    {questionText}
                 </div>
-                <div className="h-3/4 w-full">
+                <div className="col-start-1 col-end-2 row-start-2 row-end-3">
                     <Canvas shadows camera={{ position: [0, 0, 8], fov: 30 }}>
                         <InterviewerAvatarCanvas/>
                     </Canvas>
                 </div>
-                </div>
-                <div className="m-2 w-3/4 overflow-hidden">
-                    {answerBoard({solutionType, codeEditorPlaceholder: answerBoardPlaceholders[solutionType]})}
+                <div className="col-start-2 col-end-3 row-start-1 row-end-3 p-2">
+                        {answerBoard({solutionType, codeEditorPlaceholder: answerBoardPlaceholders[solutionType]})}
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 

@@ -1,5 +1,5 @@
 import { EJudge0Endpoints } from "@/constants/endpoints";
-import { SUPPORTED_LANGUAGES_CODES } from "@/constants/programmingLanguages";
+import { EProgrammingLanguages, SUPPORTED_LANGUAGES_CODES } from "@/constants/programmingLanguages";
 
 interface Judge0Submission {
   source_code: string;
@@ -26,7 +26,7 @@ interface Judge0Result {
 const JUDGE0_API_URL = process.env.NEXT_PUBLIC_JUDGE0_API_URL || 'https://judge0-ce.p.rapidapi.com';
 const JUDGE0_API_KEY = process.env.NEXT_PUBLIC_JUDGE0_API_KEY;
 
-export const submitCode = async (code: string, language: keyof typeof SUPPORTED_LANGUAGES_CODES): Promise<string> => {
+export const submitCode = async ({code, language, input}: {code: string, language: EProgrammingLanguages, input?: string}): Promise<string> => {
   if (!JUDGE0_API_KEY) {
     throw new Error('Judge0 API key is not configured');
   }
@@ -35,6 +35,10 @@ export const submitCode = async (code: string, language: keyof typeof SUPPORTED_
     source_code: code,
     language_id: SUPPORTED_LANGUAGES_CODES[language],
   };
+
+  if (input) {
+    submission.stdin = input;
+  }
 
   const response = await fetch(`${JUDGE0_API_URL}${EJudge0Endpoints.SUBMIT_CODE}`, {
     method: 'POST',
@@ -59,7 +63,7 @@ export const getSubmissionResult = async (token: string): Promise<Judge0Result> 
     throw new Error('Judge0 API key is not configured');
   }
 
-  const response = await fetch(`${JUDGE0_API_URL}${EJudge0Endpoints.GET_SUBMISSION_RESULT}/${token}`, {
+  const response = await fetch(`${JUDGE0_API_URL}${EJudge0Endpoints.GET_SUBMISSION_RESULT}${token}`, {
     headers: {
       'X-RapidAPI-Key': JUDGE0_API_KEY,
       'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
