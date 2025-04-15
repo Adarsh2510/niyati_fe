@@ -20,6 +20,7 @@ interface JudgeCodeEditorProps {
   language?: EProgrammingLanguages;
   theme?: 'light' | 'dark';
   onCodeChange?: (code: string) => void;
+  questionTestCases?: string[];
 }
 
 const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
@@ -27,6 +28,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
   language: initialLanguage = EProgrammingLanguages.JAVASCRIPT,
   theme = 'light',
   onCodeChange,
+  questionTestCases,
 }) => {
   const [code, setCode] = useAtom(userCodeResponseAtom);
   const [input, setInput] = useState<string>('');
@@ -97,7 +99,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
               <div className="mb-4">
                 <span className="p-2 text-md font-bold">Input</span>
                 <textarea
-                  rows={7}
+                  rows={4}
                   className="mt-4 w-full p-2 border-2 border-gray-300 dark:border-gray-800 rounded bg-gray-300"
                   value={input}
                   placeholder="Enter input here"
@@ -112,7 +114,19 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
               </div>
             </div>
 
-            <div className="mt-auto pt-4">
+            <div className="mb-4 overflow-auto">
+              <span className="p-2 text-md font-bold">Examples</span>
+              {questionTestCases?.map((testCase, index) => (
+                <pre
+                  key={index}
+                  className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap"
+                >
+                  <span>{testCase}</span>
+                </pre>
+              ))}
+            </div>
+
+            <div className="mt-auto pt-4 bg-gray-100">
               <div className="flex flex-row flex-wrap gap-2 justify-end items-center w-full">
                 <div className="flex-1">
                   <Select value={language} onValueChange={handleLanguageChange}>
@@ -150,7 +164,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
         </Conditional>
       </div>
 
-      <div className="absolute right-0 bottom-4">
+      <div className="absolute right-0 bottom-2">
         {isToolbarVisible ? (
           <Button
             onClick={() => setIsToolbarVisible(!isToolbarVisible)}

@@ -13,6 +13,7 @@ export interface IGetNextQuestionParams {
 export interface IIntQuestions {
   question_name: string;
   question_text: string;
+  question_test_cases?: string[];
 }
 export interface IGetNextQuestionResponse {
   question_type: QuestionType;

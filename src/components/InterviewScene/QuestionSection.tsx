@@ -28,6 +28,7 @@ function InterviewerAvatarCanvas() {
 type TAnswerBoard = {
   solutionType: ESolutionType;
   codeEditorPlaceholder?: string;
+  questionTestCases?: string[];
 };
 const answerBoard = (props: TAnswerBoard) => {
   switch (props.solutionType) {
@@ -37,7 +38,12 @@ const answerBoard = (props: TAnswerBoard) => {
       );
       return <WhiteboardCanvas />;
     default:
-      return <JudgeCodeEditor initialCode={props.codeEditorPlaceholder ?? ''} />;
+      return (
+        <JudgeCodeEditor
+          initialCode={props.codeEditorPlaceholder ?? ''}
+          questionTestCases={props.questionTestCases}
+        />
+      );
   }
 };
 const QuestionSection = ({
@@ -48,13 +54,16 @@ const QuestionSection = ({
   solutionType: ESolutionType;
 }) => {
   const questionText = currentQuestion?.next_question?.question_text;
+  const questionTestCases = currentQuestion?.next_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
   const [codeEditorPlaceholder, setCodeEditorPlaceholder] = useState('');
 
   useEffect(() => {
     speakQuestion({ questionText: questionText ?? '', setIsSpeaking });
-    const placeholder = `### Question: ${questionText}\n\n Please share your reponse using record answer button and type in your any supporting text or code here.`;
-    setCodeEditorPlaceholder(questionText ? placeholder : '');
+    const placeholder =
+      `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
+      answerBoardPlaceholders[solutionType];
+    setCodeEditorPlaceholder(questionText ? placeholder : answerBoardPlaceholders[solutionType]);
   }, [questionText]);
 
   return (
@@ -63,7 +72,7 @@ const QuestionSection = ({
         className="h-[85vh] grid grid-cols-[1fr_3fr] grid-rows-[1fr_1fr]"
         style={{ backgroundImage: `url('/meeting-room.webp')` }}
       >
-        <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{questionText}</div>
+        <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{}</div>
         <div className="col-start-1 col-end-2 row-start-2 row-end-3">
           <Canvas shadows camera={{ position: [0, 0, 5.5], fov: 40 }}>
             <InterviewerAvatarCanvas />
@@ -72,7 +81,8 @@ const QuestionSection = ({
         <div className="col-start-2 col-end-3 row-start-1 row-end-3 p-2">
           {answerBoard({
             solutionType,
-            codeEditorPlaceholder: answerBoardPlaceholders[solutionType],
+            codeEditorPlaceholder,
+            questionTestCases,
           })}
         </div>
       </div>
