@@ -1,12 +1,10 @@
-import { IGetNextQuestionResponse } from '@/lib/api/types';
 import { speakQuestion } from './speechController';
-import { useEffect, useState } from 'react';
-import { isSpeakingAtom } from './AnswerBoardTools/atoms';
-import { useSetAtom } from 'jotai';
+import { useEffect, useState, useMemo } from 'react';
+import { currentQuestionAtom, isSpeakingAtom } from './AnswerBoardTools/atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { InterviewerAvatar } from '../Avatar';
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import CodeEditor from './AnswerBoardTools/CodeEditor';
 import { ESolutionType } from '@/constants/interview';
 import WhiteboardCanvas from './AnswerBoardTools/WhiteboardCanvas';
 import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
@@ -46,13 +44,9 @@ const answerBoard = (props: TAnswerBoard) => {
       );
   }
 };
-const QuestionSection = ({
-  currentQuestion,
-  solutionType,
-}: {
-  currentQuestion?: IGetNextQuestionResponse;
-  solutionType: ESolutionType;
-}) => {
+
+const QuestionSection = ({ solutionType }: { solutionType: ESolutionType }) => {
+  const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.next_question?.question_text;
   const questionTestCases = currentQuestion?.next_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
@@ -64,7 +58,15 @@ const QuestionSection = ({
       `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
       answerBoardPlaceholders[solutionType];
     setCodeEditorPlaceholder(questionText ? placeholder : answerBoardPlaceholders[solutionType]);
-  }, [questionText]);
+  }, [questionText, solutionType]);
+
+  const answerBoardComponent = useMemo(() => {
+    return answerBoard({
+      solutionType,
+      codeEditorPlaceholder,
+      questionTestCases,
+    });
+  }, [solutionType, codeEditorPlaceholder, questionTestCases]);
 
   return (
     <>
@@ -79,11 +81,7 @@ const QuestionSection = ({
           </Canvas>
         </div>
         <div className="col-start-2 col-end-3 row-start-1 row-end-3 p-2">
-          {answerBoard({
-            solutionType,
-            codeEditorPlaceholder,
-            questionTestCases,
-          })}
+          {answerBoardComponent}
         </div>
       </div>
     </>

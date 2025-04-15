@@ -12,12 +12,12 @@ import { TUserResponse } from '@/lib/api/types';
 import { redirect } from 'next/navigation';
 import DashboardHeader from '@/components/common/DashboardHeader';
 import Footer from '@/components/common/Footer';
+import { currentQuestionAtom } from '@/components/InterviewScene/AnswerBoardTools/atoms';
+import { useAtom } from 'jotai';
 
 export default function InterviewRoom({ params }: { params: { interview_id: string } }) {
   const { interview_id } = params;
-  const [currentQuestion, setCurrentQuestion] = useState<IGetNextQuestionResponse | undefined>(
-    undefined
-  );
+  const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
   // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
@@ -79,14 +79,12 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-      <QuestionSection
-        currentQuestion={currentQuestion}
-        solutionType={solutionType ?? ESolutionType.TEXT_ANSWER}
-      />
+      <QuestionSection solutionType={solutionType ?? ESolutionType.TEXT_ANSWER} />
       <InterviewControllers
         handleNextQuestion={handleNextQuestion}
         handleUserResponse={handleUserResponse}
         className="p-2 bg-gray-100 border-t"
+        interviewId={interview_id}
       />
       <Footer />
     </div>

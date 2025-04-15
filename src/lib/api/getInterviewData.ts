@@ -8,6 +8,7 @@ import {
   ISubmitAnswerResponse,
   TGetInterviewSummaryResponse,
   TGetInterviewSummaryRequest,
+  IGetCurrentQuestionResponse,
 } from './types';
 import { sendLog } from '@/utils/logs';
 import { ELogLevels } from '@/constants/logs';
@@ -89,5 +90,20 @@ export const getInterviewSummary = async (
     user_id,
   };
   const response = await fetchApiData<TGetInterviewSummaryResponse>(url, 'POST', body);
+  return response.data;
+};
+
+export const getCurrentQuestion = async (params: {
+  user_id: string;
+  interview_id: string;
+}): Promise<IGetCurrentQuestionResponse> => {
+  const { interview_id, user_id } = params;
+  const url = getNiyatiBackendApiUrl(EBackendEndpoints.GET_CURRENT_QUESTION);
+
+  const body = {
+    interview_id,
+    user_id,
+  };
+  const response = await fetchApiData<IGetCurrentQuestionResponse>(url, 'POST', body);
   return response.data;
 };

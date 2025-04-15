@@ -74,7 +74,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
 
   useEffect(() => {
     setCode(initialCode);
-  }, []);
+  }, [initialCode]);
 
   return (
     <>

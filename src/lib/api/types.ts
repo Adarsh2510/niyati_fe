@@ -23,6 +23,11 @@ export interface IGetNextQuestionResponse {
   solution_type: ESolutionType;
 }
 
+export interface IGetCurrentQuestionResponse
+  extends Omit<IGetNextQuestionResponse, 'next_question'> {
+  current_question: IIntQuestions;
+}
+
 export type TUserResponse = {
   audio_response: string; // audio response which is now converted to text
   text_response?: string; // text response - from code/text editor
