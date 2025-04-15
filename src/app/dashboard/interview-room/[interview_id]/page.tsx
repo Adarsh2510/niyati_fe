@@ -2,7 +2,7 @@
 import 'regenerator-runtime/runtime';
 
 import { IGetNextQuestionResponse } from '@/lib/api/types';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
 import QuestionSection from '@/components/InterviewScene/QuestionSection';
@@ -14,6 +14,7 @@ import DashboardHeader from '@/components/common/DashboardHeader';
 import Footer from '@/components/common/Footer';
 import { currentQuestionAtom } from '@/components/InterviewScene/AnswerBoardTools/atoms';
 import { useAtom } from 'jotai';
+import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 
 export default function InterviewRoom({ params }: { params: { interview_id: string } }) {
   const { interview_id } = params;
@@ -22,7 +23,13 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
   // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
   const followUpQuestionId = useRef<string | null>(null);
-  console.log('re rendered');
+  const answerBoardPlaceholder = useMemo(() => {
+    const questionText = currentQuestion?.next_question?.question_text;
+    return questionText
+      ? `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
+          answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER]
+      : answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER];
+  }, [currentQuestion, solutionType]);
 
   const handleNextQuestion = async () => {
     getNextQuestion({ user_id: 'test-user-id', interview_id: interview_id }).then(data => {
@@ -71,6 +78,7 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
 
   const handleUserResponse = async (response: TUserResponse) => {
     console.log(response);
+    response.code_response = response.code_response?.replace(answerBoardPlaceholder, '');
     handleSubmitAnswer(response);
   };
 
@@ -79,7 +87,10 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-      <QuestionSection solutionType={solutionType ?? ESolutionType.TEXT_ANSWER} />
+      <QuestionSection
+        solutionType={solutionType ?? ESolutionType.TEXT_ANSWER}
+        answerBoardPlaceholder={answerBoardPlaceholder}
+      />
       <InterviewControllers
         handleNextQuestion={handleNextQuestion}
         handleUserResponse={handleUserResponse}

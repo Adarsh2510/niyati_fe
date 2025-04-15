@@ -25,7 +25,7 @@ function InterviewerAvatarCanvas() {
 
 type TAnswerBoard = {
   solutionType: ESolutionType;
-  codeEditorPlaceholder?: string;
+  answerBoardPlaceholder?: string;
   questionTestCases?: string[];
 };
 const answerBoard = (props: TAnswerBoard) => {
@@ -38,35 +38,36 @@ const answerBoard = (props: TAnswerBoard) => {
     default:
       return (
         <JudgeCodeEditor
-          initialCode={props.codeEditorPlaceholder ?? ''}
+          initialCode={props.answerBoardPlaceholder ?? ''}
           questionTestCases={props.questionTestCases}
         />
       );
   }
 };
 
-const QuestionSection = ({ solutionType }: { solutionType: ESolutionType }) => {
+const QuestionSection = ({
+  solutionType,
+  answerBoardPlaceholder,
+}: {
+  solutionType: ESolutionType;
+  answerBoardPlaceholder: string;
+}) => {
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.next_question?.question_text;
   const questionTestCases = currentQuestion?.next_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
-  const [codeEditorPlaceholder, setCodeEditorPlaceholder] = useState('');
 
   useEffect(() => {
     speakQuestion({ questionText: questionText ?? '', setIsSpeaking });
-    const placeholder =
-      `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
-      answerBoardPlaceholders[solutionType];
-    setCodeEditorPlaceholder(questionText ? placeholder : answerBoardPlaceholders[solutionType]);
-  }, [questionText, solutionType]);
+  }, [questionText]);
 
   const answerBoardComponent = useMemo(() => {
     return answerBoard({
       solutionType,
-      codeEditorPlaceholder,
+      answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, codeEditorPlaceholder, questionTestCases]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases]);
 
   return (
     <>
