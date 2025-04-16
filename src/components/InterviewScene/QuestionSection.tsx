@@ -1,6 +1,10 @@
 import { speakQuestion } from './speechController';
 import { useEffect, useState, useMemo } from 'react';
-import { currentQuestionAtom, isSpeakingAtom } from './AnswerBoardTools/atoms';
+import {
+  currentQuestionAtom,
+  isSpeakingAtom,
+  currentWordIndexAtom,
+} from './AnswerBoardTools/atoms';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { InterviewerAvatar } from '../Avatar';
 import { Environment } from '@react-three/drei';
@@ -10,6 +14,8 @@ import WhiteboardCanvas from './AnswerBoardTools/WhiteboardCanvas';
 import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { toast } from 'sonner';
 import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
+import QuestionCaption from './QuestionCaption';
+
 function InterviewerAvatarCanvas() {
   // const backgroundImage = useTexture('/meeting-room.webp');
   // const viewPort = useThree((state: any) => state.viewport);
@@ -56,10 +62,15 @@ const QuestionSection = ({
   const questionText = currentQuestion?.next_question?.question_text;
   const questionTestCases = currentQuestion?.next_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
+  const setCurrentWordIndex = useSetAtom(currentWordIndexAtom);
 
   useEffect(() => {
-    speakQuestion({ questionText: questionText ?? '', setIsSpeaking });
-  }, [questionText]);
+    speakQuestion({
+      questionText: questionText ?? '',
+      setIsSpeaking,
+      setCurrentWordIndex,
+    });
+  }, [questionText, setIsSpeaking, setCurrentWordIndex]);
 
   const answerBoardComponent = useMemo(() => {
     return answerBoard({
@@ -85,6 +96,7 @@ const QuestionSection = ({
           {answerBoardComponent}
         </div>
       </div>
+      <QuestionCaption />
     </>
   );
 };
