@@ -24,7 +24,7 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
   const followUpQuestionId = useRef<string | null>(null);
   const answerBoardPlaceholder = useMemo(() => {
-    const questionText = currentQuestion?.next_question?.question_text;
+    const questionText = currentQuestion?.current_question?.question_text;
     return questionText
       ? `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
           answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER]
@@ -36,8 +36,11 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
       if (data.is_interview_completed) {
         setCurrentQuestion(undefined);
         setIsInterviewCompleted(true);
-      } else {
-        setCurrentQuestion(data);
+      } else if (data.next_question) {
+        setCurrentQuestion({
+          ...data,
+          current_question: data.next_question,
+        });
         setSolutionType(data.solution_type);
       }
     });
@@ -57,7 +60,7 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
         followUpQuestionId.current = Object.keys(data.follow_up_question)[0] ?? null;
         setCurrentQuestion({
           question_type: QuestionType.FOLLOW_UP,
-          next_question: Object.values(data.follow_up_question)[0],
+          current_question: Object.values(data.follow_up_question)[0],
           is_last_question: false,
           is_interview_completed: false,
           solution_type: currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER,
@@ -68,8 +71,11 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
           if (data.is_interview_completed) {
             setCurrentQuestion(undefined);
             setIsInterviewCompleted(true);
-          } else {
-            setCurrentQuestion(data);
+          } else if (data.next_question) {
+            setCurrentQuestion({
+              ...data,
+              current_question: data.next_question,
+            });
           }
         });
       }

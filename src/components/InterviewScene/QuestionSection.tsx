@@ -59,8 +59,8 @@ const QuestionSection = ({
   answerBoardPlaceholder: string;
 }) => {
   const currentQuestion = useAtomValue(currentQuestionAtom);
-  const questionText = currentQuestion?.next_question?.question_text;
-  const questionTestCases = currentQuestion?.next_question?.question_test_cases;
+  const questionText = currentQuestion?.current_question?.question_text;
+  const questionTestCases = currentQuestion?.current_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
   const setCurrentWordIndex = useSetAtom(currentWordIndexAtom);
 
@@ -70,7 +70,7 @@ const QuestionSection = ({
       setIsSpeaking,
       setCurrentWordIndex,
     });
-  }, [questionText, setIsSpeaking, setCurrentWordIndex]);
+  }, [questionText, currentQuestion?._repeatId, setIsSpeaking, setCurrentWordIndex]);
 
   const answerBoardComponent = useMemo(() => {
     return answerBoard({
@@ -78,7 +78,7 @@ const QuestionSection = ({
       answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, answerBoardPlaceholder, questionTestCases]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases, currentQuestion?._repeatId]);
 
   return (
     <>

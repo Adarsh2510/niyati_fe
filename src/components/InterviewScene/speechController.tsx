@@ -1,3 +1,6 @@
+import { ELogLevels } from '@/constants/logs';
+import { sendLog } from '@/utils/logs';
+
 export const speakQuestion = ({
   questionText,
   setIsSpeaking,
@@ -8,8 +11,12 @@ export const speakQuestion = ({
   setCurrentWordIndex: (index: number) => void;
 }) => {
   if (questionText) {
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(questionText);
-    console.log('Speaking question:', questionText);
+    sendLog({
+      level: ELogLevels.Info,
+      message: 'Speaking question:' + questionText,
+    });
 
     utterance.lang = 'en-US';
     utterance.pitch = 1;
@@ -25,7 +32,10 @@ export const speakQuestion = ({
     };
 
     utterance.onstart = () => {
-      console.log('Speech started');
+      sendLog({
+        level: ELogLevels.Info,
+        message: 'Speech started',
+      });
       setIsSpeaking(true);
       // Reset the current word index when starting new speech
       currentWordIndex = 0;
@@ -33,11 +43,23 @@ export const speakQuestion = ({
     };
 
     utterance.onend = () => {
-      console.log('Speech ended');
+      sendLog({
+        level: ELogLevels.Info,
+        message: 'Speech ended',
+      });
       setIsSpeaking(false);
       setCurrentWordIndex(-1);
     };
-    utterance.onerror = event => console.error('Speech error:', event);
+    utterance.onerror = event => {
+      // Ignore errors with "interrupted" message as they're expected when canceling speech
+      if (event.error !== 'interrupted') {
+        sendLog({
+          level: ELogLevels.Error,
+          message: 'Speech error:',
+          err: event as unknown as Error,
+        });
+      }
+    };
 
     window.speechSynthesis.speak(utterance);
   }

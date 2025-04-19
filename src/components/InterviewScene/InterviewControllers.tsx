@@ -53,12 +53,10 @@ const InterviewControllers = ({
         interview_id: interviewId,
       });
       if (currentQuestion.current_question) {
-        const question = {
+        setCurrentQuestion({
           ...currentQuestion,
-          current_question: null,
-          next_question: currentQuestion.current_question,
-        };
-        setCurrentQuestion(question);
+          _repeatId: Math.random(),
+        });
       }
     } catch (error) {
       toast.error('Error repeating question');

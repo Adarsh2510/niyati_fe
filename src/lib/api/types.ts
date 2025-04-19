@@ -25,7 +25,7 @@ export interface IGetNextQuestionResponse {
 
 export interface IGetCurrentQuestionResponse
   extends Omit<IGetNextQuestionResponse, 'next_question'> {
-  current_question: IIntQuestions;
+  current_question: IIntQuestions | null;
 }
 
 export type TUserResponse = {
