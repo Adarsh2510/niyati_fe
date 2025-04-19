@@ -12,15 +12,20 @@ import { TUserResponse } from '@/lib/api/types';
 import { redirect } from 'next/navigation';
 import DashboardHeader from '@/components/common/DashboardHeader';
 import Footer from '@/components/common/Footer';
-import { currentQuestionAtom } from '@/components/InterviewScene/AnswerBoardTools/atoms';
-import { useAtom } from 'jotai';
+import {
+  currentQuestionAtom,
+  excalidrawRefAtom,
+} from '@/components/InterviewScene/AnswerBoardTools/atoms';
+import { useAtom, useAtomValue } from 'jotai';
 import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
+import { generateWhiteboardImageUrl } from '@/components/InterviewScene/AnswerBoardTools/utils';
 
 export default function InterviewRoom({ params }: { params: { interview_id: string } }) {
   const { interview_id } = params;
   const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
+  const excalidrawRef = useAtomValue(excalidrawRefAtom);
   // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
   const followUpQuestionId = useRef<string | null>(null);
   const answerBoardPlaceholder = useMemo(() => {
@@ -83,8 +88,9 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   };
 
   const handleUserResponse = async (response: TUserResponse) => {
-    console.log(response);
     response.code_response = response.code_response?.replace(answerBoardPlaceholder, '');
+    response.image_response = await generateWhiteboardImageUrl(excalidrawRef);
+    console.log(response);
     handleSubmitAnswer(response);
   };
 
