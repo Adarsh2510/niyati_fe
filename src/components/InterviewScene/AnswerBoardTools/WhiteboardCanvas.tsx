@@ -1,89 +1,98 @@
-import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
 import { useRef, useState } from 'react';
+import { Excalidraw, exportToBlob } from '@excalidraw/excalidraw';
+import '@excalidraw/excalidraw/index.css';
 import { Button } from '@/components/ui/button';
-import { Eraser, Pen, Save, Trash2 } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { ELogLevels } from '@/constants/logs';
-import { sendLog } from '@/utils/logs';
 import { uploadImage } from '@/lib/services/cloudinary';
 import { userImageResponseAtom } from './atoms';
 import { useSetAtom } from 'jotai';
+import { sendLog } from '@/utils/logs';
+import { ELogLevels } from '@/constants/logs';
 
 const WhiteboardCanvas = () => {
-  const canvasRef = useRef<ReactSketchCanvasRef>(null);
-  const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
-  const [color, setColor] = useState('#000000');
+  const excalidrawRef = useRef<any>(null);
+  const [initialData] = useState({
+    elements: [],
+    appState: {
+      viewBackgroundColor: '#ffffff',
+    },
+    scrollToContent: true,
+  });
   const setUserImageResponse = useSetAtom(userImageResponseAtom);
 
   const handleSave = async () => {
-    if (canvasRef.current) {
+    if (excalidrawRef.current) {
       try {
-        const dataUrl = await canvasRef.current.exportImage('jpeg');
+        const elements = excalidrawRef.current.getSceneElements();
+
+        const blob = await exportToBlob({
+          elements,
+          appState: {
+            ...excalidrawRef.current.getAppState(),
+            exportWithDarkMode: false,
+            exportEmbedScene: false,
+            exportBackground: true,
+          },
+          files: excalidrawRef.current.getFiles(),
+          mimeType: 'image/jpeg',
+          quality: 0.9,
+        });
+
+        const file = new File([blob], 'whiteboard.jpeg', { type: 'image/jpeg' });
+
         const imageUrl = await uploadImage(
-          new File([dataUrl], 'whiteboard.jpeg', { type: 'image/jpeg' }),
+          file,
           `whiteboard_response-${Date.now() + Math.random().toString(36).substring(0, 8)}`
         );
-        setUserImageResponse(imageUrl);
-        toast.success('Whiteboard image saved successfully !');
-      } catch (error) {
-        toast.error('Error saving image, Please try again !');
-      }
-    }
-  };
 
-  const handleClear = () => {
-    if (canvasRef.current) {
-      canvasRef.current.clearCanvas();
+        setUserImageResponse(imageUrl);
+        toast.success('Whiteboard image saved successfully!');
+      } catch (error) {
+        sendLog({
+          message: 'Error saving whiteboard image',
+          err: error as Error,
+          level: ELogLevels.Error,
+        });
+        toast.error('Error saving image. Please try again!');
+      }
     }
   };
 
   return (
     <div className="w-full h-full flex flex-row">
       <div className="flex flex-col items-center gap-2 p-2 pl-4 pb-4">
-        <Button
-          variant={tool === 'pen' ? 'default' : 'outline'}
-          size="icon"
-          onClick={() => setTool('pen')}
-        >
-          <Pen className="h-4 w-4" />
-        </Button>
-        <Button
-          variant={tool === 'eraser' ? 'default' : 'outline'}
-          size="icon"
-          onClick={() => setTool('eraser')}
-        >
-          <Eraser className="h-4 w-4" />
-        </Button>
-        <input
-          type="color"
-          value={color}
-          onChange={e => setColor(e.target.value)}
-          className="w-8 h-8 rounded cursor-pointer"
-        />
-        <Button variant="outline" size="icon" onClick={handleClear} className="ml-auto">
-          <Trash2 className="h-4 w-4" />
-        </Button>
-        <Button variant="default" size="icon" onClick={handleSave}>
+        <Button variant="default" size="icon" onClick={handleSave} title="Save">
           <Save className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex-1 bg-white p-2 rounded-lg">
-        <ReactSketchCanvas
-          ref={canvasRef}
-          strokeWidth={4}
-          strokeColor={color}
-          width="100%"
-          height="100%"
+      <div className="flex-1 bg-white p-2 rounded-lg" style={{ height: 'calc(100% - 16px)' }}>
+        <div
           style={{
-            border: '1px solid rgb(170, 162, 162)',
-            borderRadius: '10px',
-            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
+            height: '100%',
+            width: '100%',
+            borderRadius: '8px',
             overflow: 'hidden',
+            border: '1px solid rgb(170, 162, 162)',
+            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
           }}
-          exportWithBackgroundImage={false}
-          withTimestamp={true}
-          backgroundImage={undefined}
-        />
+        >
+          <Excalidraw
+            excalidrawAPI={api => (excalidrawRef.current = api)}
+            initialData={initialData as any}
+            name="Whiteboard"
+            aiEnabled={false}
+            UIOptions={{
+              canvasActions: {
+                export: false,
+                saveAsImage: false,
+                saveToActiveFile: false,
+                loadScene: false,
+                clearCanvas: true,
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );
