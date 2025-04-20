@@ -4,6 +4,7 @@ export type TInterviewSelectFormProps = {
   domain?: string;
   language?: string;
   targetCompany?: string;
+  interviewRound?: string;
 };
 
 export type TInterviewFormValues = {
@@ -13,4 +14,5 @@ export type TInterviewFormValues = {
   domain: string;
   programmingLanguage: string;
   targetCompany: string;
+  interviewRound: string;
 };

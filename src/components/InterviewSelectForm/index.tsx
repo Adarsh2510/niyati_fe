@@ -33,6 +33,7 @@ type FormValues = {
   domain: string;
   language: string;
   targetCompany: string;
+  interviewRound: string;
 };
 
 export default function StartInterviewForm(props: TInterviewSelectFormProps) {
@@ -44,7 +45,7 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
   const router = useRouter();
 
   async function onSubmit(values: FormValues) {
-    const { role, experience, domain, language, targetCompany } = values;
+    const { role, experience, domain, language, targetCompany, interviewRound } = values;
     setIsLoading(true);
     try {
       const data = await initialzeInterviewForm({
@@ -54,6 +55,7 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
         domain,
         programmingLanguage: language,
         targetCompany,
+        interviewRound,
       });
       if (!data.interview_id) {
         toast('Something went wrong, please try again');

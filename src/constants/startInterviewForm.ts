@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { EDomain, EExperience, EProgrammingLanguage, ERole, ETargetCompany } from './interview';
+import {
+  EDomain,
+  EExperience,
+  EInterviewRound,
+  EProgrammingLanguage,
+  ERole,
+  ETargetCompany,
+} from './interview';
 
 export const FORM_FIELDS = {
   role: {
@@ -69,6 +76,20 @@ export const FORM_FIELDS = {
       { value: ETargetCompany.FACEBOOK, label: 'Facebook' },
     ],
   },
+  interviewRound: {
+    name: 'interviewRound',
+    label: 'Interview Round',
+    placeholder: 'Select Interview Round',
+    validation: z.string({
+      required_error: 'Please select an interview round.',
+    }),
+    options: [
+      { value: EInterviewRound.TECHNICAL_ROUND_1, label: 'Technical Round 1' },
+      { value: EInterviewRound.TECHNICAL_ROUND_2, label: 'Technical Round 2' },
+      { value: EInterviewRound.MANAGERIAL_ROUND, label: 'Managerial Round' },
+      { value: EInterviewRound.HR_ROUND, label: 'HR Round' },
+    ],
+  },
 };
 
 export const formSchema = z.object({
@@ -77,4 +98,5 @@ export const formSchema = z.object({
   domain: z.string(),
   language: z.string(),
   targetCompany: z.string(),
+  interviewRound: z.string(),
 });
