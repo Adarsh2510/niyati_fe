@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import UnSupportedBrowser from './UnSupportedBrowser';
 import { TUserResponse } from '@/lib/api/types';
@@ -11,11 +11,15 @@ import { useAtomValue } from 'jotai';
 import { Button } from '../ui/button';
 import { getCurrentQuestion } from '@/lib/api/getInterviewData';
 import { useSetAtom } from 'jotai';
-import { isSpeakingAtom, currentQuestionAtom } from './AnswerBoardTools/atoms';
+import { currentQuestionAtom } from './AnswerBoardTools/atoms';
 import { RefreshCw } from 'lucide-react';
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
 import { toast } from 'sonner';
+import MicrophoneController from './MicrophoneController';
+import { InterviewRoomSocket } from '@/lib/socket/InterviewRoomSocket';
+import { useSession } from 'next-auth/react';
+import { InterviewRoomResponse, IntWSSMessageType } from '@/types/interview';
 
 enum ESubmitBtnStates {
   INITIAL = 'Record Answer',
@@ -37,6 +41,9 @@ const InterviewControllers = ({
   const [submitBtnLabel, setSubmitBtnLabel] = useState(ESubmitBtnStates.INITIAL);
   const [isMounted, setIsMounted] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [socket, setSocket] = useState<InterviewRoomSocket | null>(null);
+  const { data: session } = useSession();
   const setCurrentQuestion = useSetAtom(currentQuestionAtom);
   const userTextResponse = useAtomValue(userTextResponseAtom);
   const userImageResponse = useAtomValue(userImageResponseAtom);
@@ -44,6 +51,75 @@ const InterviewControllers = ({
 
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
+
+  const initializeSocket = useCallback(async () => {
+    if (session?.accessToken) {
+      const newSocket = InterviewRoomSocket.getInstance(interviewId);
+      setSocket(newSocket);
+
+      newSocket.onConnect(() => {
+        sendLog({
+          level: ELogLevels.Info,
+          message: 'WebSocket connected successfully',
+        });
+        toast.success('Connected to interview room');
+      });
+
+      newSocket.onError(error => {
+        sendLog({
+          level: ELogLevels.Error,
+          message: 'WebSocket error:',
+          err: error as Error,
+        });
+        toast.error('Connection error. Please try again.');
+      });
+
+      newSocket.onDisconnect(() => {
+        sendLog({
+          level: ELogLevels.Info,
+          message: 'WebSocket disconnected',
+        });
+        toast.warning('Disconnected from interview room');
+      });
+
+      newSocket.onResponse((response: InterviewRoomResponse) => {
+        switch (response.type) {
+          case IntWSSMessageType.CONNECTION:
+            console.log('Connection established:', response.message);
+            break;
+
+          case IntWSSMessageType.SYSTEM_MESSAGE:
+            console.log('System message:', response.message);
+            break;
+
+          case IntWSSMessageType.USER_RESPONSE:
+            // Handle interview completed status
+            if (response.is_interview_completed) {
+              console.log('Interview completed');
+            }
+            // Let existing handlers manage the question
+            break;
+
+          default:
+            console.warn('Unknown message type:', response);
+        }
+      });
+
+      return newSocket;
+    }
+    return null;
+  }, [interviewId, session?.accessToken]);
+
+  useEffect(() => {
+    const setupSocket = async () => {
+      const socketInstance = await initializeSocket();
+      return () => {
+        socketInstance?.cleanup();
+      };
+    };
+
+    setupSocket();
+  }, [initializeSocket]);
 
   const handleRepeatQuestion = async () => {
     setIsRepeating(true);
@@ -77,7 +153,10 @@ const InterviewControllers = ({
         SpeechRecognition.startListening({ continuous: true });
       } else if (submitBtnLabel === ESubmitBtnStates.SUBMIT) {
         SpeechRecognition.stopListening();
-        console.log('transcript', transcript);
+        sendLog({
+          level: ELogLevels.Info,
+          message: `Transcript: ${transcript}`,
+        });
         handleUserResponse({
           audio_response: transcript,
           text_response: userTextResponse,
@@ -130,6 +209,13 @@ const InterviewControllers = ({
       >
         {submitBtnLabel}
       </Button>
+      {socket && (
+        <MicrophoneController
+          socket={socket}
+          isRecording={isRecording}
+          onRecordingChange={setIsRecording}
+        />
+      )}
     </div>
   );
 };

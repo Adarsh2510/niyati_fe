@@ -10,6 +10,8 @@ export const speakQuestion = ({
   setIsSpeaking: (isSpeaking: boolean) => void;
   setCurrentWordIndex: (index: number) => void;
 }) => {
+  if (typeof window === 'undefined') return;
+
   if (questionText) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(questionText);

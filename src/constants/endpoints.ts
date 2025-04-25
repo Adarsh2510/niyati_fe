@@ -4,6 +4,7 @@ export enum EBackendEndpoints {
   SUBMIT_ANSWER = '/api/v1/submit-answer',
   GET_INTERVIEW_SUMMARY = '/api/v1/get-interview-summary',
   GET_CURRENT_QUESTION = '/api/v1/get-current-question',
+  INTERVIEW_ROOM_WS = '/ws/interview-room',
 }
 
 export enum EJudge0Endpoints {
