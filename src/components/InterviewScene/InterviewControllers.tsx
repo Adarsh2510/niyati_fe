@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import MicrophoneController from './MicrophoneController';
 import { InterviewRoomSocket } from '@/lib/socket/InterviewRoomSocket';
 import { useSession } from 'next-auth/react';
-import { InterviewRoomResponse, IntWSSMessageType } from '@/types/interview';
+import { InterviewRoomResponse, MessageType, UserResponsePayload } from '@/types/interview';
 
 enum ESubmitBtnStates {
   INITIAL = 'Record Answer',
@@ -34,7 +34,7 @@ const InterviewControllers = ({
   interviewId,
 }: {
   handleNextQuestion: () => void;
-  handleUserResponse: (response: TUserResponse) => void;
+  handleUserResponse: (response: UserResponsePayload) => void;
   className?: string;
   interviewId: string;
 }) => {
@@ -84,15 +84,15 @@ const InterviewControllers = ({
 
       newSocket.onResponse((response: InterviewRoomResponse) => {
         switch (response.type) {
-          case IntWSSMessageType.CONNECTION:
+          case MessageType.CONNECTION:
             console.log('Connection established:', response.message);
             break;
 
-          case IntWSSMessageType.SYSTEM_MESSAGE:
+          case MessageType.SYSTEM_MESSAGE:
             console.log('System message:', response.message);
             break;
 
-          case IntWSSMessageType.USER_RESPONSE:
+          case MessageType.USER_RESPONSE:
             // Handle interview completed status
             if (response.is_interview_completed) {
               console.log('Interview completed');

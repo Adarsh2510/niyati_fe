@@ -1,15 +1,21 @@
-import {
-  Command,
-  IntWSSMessageType,
-  InterviewRoomMessage,
-  InterviewRoomResponse,
-  UserResponse,
-} from '@/types/interview';
 import { EBackendEndpoints } from '@/constants/endpoints';
-import { getNiyatiBackendApiUrl } from '@/utils/apiBE';
 import { ELogLevels } from '@/constants/logs';
-import { sendLog } from '@/utils/logs';
+import { getNiyatiBackendApiUrl } from '@/utils/apiBE';
 import { getSession } from 'next-auth/react';
+import {
+  AudioMessage,
+  AudioPayload,
+  CommandType,
+  HeartbeatMessage,
+  HeartbeatPayload,
+  InterviewRoomResponse,
+  MessageType,
+  UserResponseMessage,
+  UserResponsePayload,
+  WebSocketMessage,
+  SystemPayload,
+} from '@/types/interview';
+import { sendLog } from '@/utils/logs';
 
 // WebSocket connection states
 enum WebSocketState {
@@ -210,6 +216,10 @@ export class InterviewRoomSocket {
   private handleMessage(event: MessageEvent): void {
     try {
       const response: InterviewRoomResponse = JSON.parse(event.data);
+      sendLog({
+        level: ELogLevels.Info,
+        message: `Received WebSocket message: ${JSON.stringify(response)}`,
+      });
       this.responseCallbacks.forEach(callback => callback(response));
     } catch (error) {
       this.handleError(new WebSocketError('Failed to parse message', 'PARSE_ERROR'));
@@ -241,11 +251,19 @@ export class InterviewRoomSocket {
     this.stopHeartbeat();
     this.heartbeatInterval = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        const heartbeatMessage: InterviewRoomMessage = {
-          command: Command.SPEAK,
-          user_response: {},
+        const heartbeatMessage: HeartbeatMessage = {
+          type: MessageType.HEARTBEAT,
+          command: CommandType.HEARTBEAT,
+          payload: {
+            client_timestamp: Date.now(),
+          },
+          timestamp: Date.now(),
         };
         this.ws.send(JSON.stringify(heartbeatMessage));
+        sendLog({
+          level: ELogLevels.Info,
+          message: 'Sent heartbeat message',
+        });
       }
     }, this.config.heartbeatDelay);
   }
@@ -287,14 +305,30 @@ export class InterviewRoomSocket {
       return;
     }
 
-    const message: InterviewRoomMessage = {
-      command: Command.SPEAK,
-      user_response: {},
-      audio_chunks: [...this.audioBuffer],
+    // Convert binary audio chunks to Base64 strings for JSON serialization
+    const base64Chunks = this.audioBuffer.map(chunk =>
+      btoa(String.fromCharCode.apply(null, Array.from(chunk)))
+    );
+
+    // Create the audio message with the new protocol
+    const message: AudioMessage = {
+      type: MessageType.SYSTEM_MESSAGE,
+      command: CommandType.SPEAK,
+      payload: {
+        audio_chunks: base64Chunks,
+        format: 'audio/webm', // Or whatever format is appropriate
+      },
+      timestamp: Date.now(),
     };
 
     try {
       this.ws?.send(JSON.stringify(message));
+
+      sendLog({
+        level: ELogLevels.Info,
+        message: `Sent ${this.audioBuffer.length} audio chunks for command ${CommandType.SPEAK}`,
+      });
+
       // Clear the buffer after successful send
       this.audioBuffer = [];
     } catch (error) {
@@ -329,13 +363,19 @@ export class InterviewRoomSocket {
    * Send user response over the WebSocket
    * @param response User response object
    */
-  public sendUserResponse(response: UserResponse): void {
+  public sendUserResponse(response: UserResponsePayload): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      const message: InterviewRoomMessage = {
-        command: Command.USER_RESPONSE,
-        user_response: response,
+      const message: UserResponseMessage = {
+        type: MessageType.USER_RESPONSE,
+        command: CommandType.USER_RESPONSE,
+        payload: response,
+        timestamp: Date.now(),
       };
       this.ws.send(JSON.stringify(message));
+      sendLog({
+        level: ELogLevels.Info,
+        message: `Sent user response: ${JSON.stringify(response)}`,
+      });
     } else if (this.state !== WebSocketState.CONNECTING) {
       this.connect();
     }
@@ -346,11 +386,17 @@ export class InterviewRoomSocket {
    */
   public getAllSolutionData(): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      const message: InterviewRoomMessage = {
-        command: Command.GET_ALL_SOLUTION_DATA,
-        user_response: {},
+      const message: WebSocketMessage<SystemPayload> = {
+        type: MessageType.SYSTEM_MESSAGE,
+        command: CommandType.GET_ALL_SOLUTION_DATA,
+        payload: {},
+        timestamp: Date.now(),
       };
       this.ws.send(JSON.stringify(message));
+      sendLog({
+        level: ELogLevels.Info,
+        message: 'Requested all solution data',
+      });
     } else if (this.state !== WebSocketState.CONNECTING) {
       this.connect();
     }
