@@ -1,42 +1,26 @@
-import { EBackendEndpoints } from '@/constants/endpoints';
-import { ELogLevels } from '@/constants/logs';
-import { getNiyatiBackendApiUrl } from '@/utils/apiBE';
-import { getSession } from 'next-auth/react';
-import {
-  AudioMessage,
-  AudioPayload,
-  CommandType,
-  HeartbeatMessage,
-  HeartbeatPayload,
-  InterviewRoomResponse,
-  MessageType,
-  UserResponseMessage,
-  UserResponsePayload,
-  WebSocketMessage,
-  SystemPayload,
-} from '@/types/interview';
 import { sendLog } from '@/utils/logs';
+import { ELogLevels } from '@/constants/logs';
+import {
+  MessageType,
+  CommandType,
+  WebSocketMessage,
+  UserResponsePayload,
+  AudioPayload,
+  HeartbeatPayload,
+  ErrorPayload,
+  ConnectionPayload,
+  QuestionPayload,
+  SolutionSavedPayload,
+  InterviewRoomResponse,
+} from '@/types/interview';
 
-// WebSocket connection states
-enum WebSocketState {
-  CONNECTING = 'CONNECTING',
-  OPEN = 'OPEN',
-  CLOSING = 'CLOSING',
-  CLOSED = 'CLOSED',
+interface WebSocketCallbacks {
+  onConnect?: () => void;
+  onDisconnect?: () => void;
+  onError?: (error: unknown) => void;
+  onResponse?: (response: InterviewRoomResponse) => void;
 }
 
-// Custom error types
-class WebSocketError extends Error {
-  constructor(
-    message: string,
-    public code: string
-  ) {
-    super(message);
-    this.name = 'WebSocketError';
-  }
-}
-
-// Connection configuration
 interface ConnectionConfig {
   maxReconnectAttempts: number;
   reconnectDelay: number;
@@ -45,226 +29,177 @@ interface ConnectionConfig {
   maxAudioBufferSize: number;
 }
 
-// Default configuration
 const DEFAULT_CONFIG: ConnectionConfig = {
   maxReconnectAttempts: 5,
   reconnectDelay: 1000,
   heartbeatDelay: 30000,
-  audioThrottleInterval: 5000, // 5 seconds
-  maxAudioBufferSize: 50, // Maximum number of audio chunks to buffer
+  audioThrottleInterval: 5000,
+  maxAudioBufferSize: 50,
 };
 
-// Singleton instance map
-const instances = new Map<string, InterviewRoomSocket>();
-
-/**
- * Get WebSocket URL from backend URL
- * @param roomId The interview room ID
- * @returns Properly formatted WebSocket URL
- */
-function getWebSocketUrl(roomId: string): string {
-  // Get the base API URL
-  const httpUrl = getNiyatiBackendApiUrl(`${EBackendEndpoints.INTERVIEW_ROOM_WS}/${roomId}`);
-
-  // Convert to WebSocket URL (ws:// or wss://)
-  return httpUrl.replace(/^http/, 'ws');
-}
+const isBrowser = typeof window !== 'undefined';
 
 export class InterviewRoomSocket {
+  private static instances: Map<string, InterviewRoomSocket> = new Map();
   private ws: WebSocket | null = null;
-  private readonly url: string;
-  private readonly config: ConnectionConfig;
-  private state: WebSocketState = WebSocketState.CLOSED;
-  private reconnectAttempts: number = 0;
+  private roomId: string;
+  private token: string;
+  private config: ConnectionConfig;
+  private callbacks: WebSocketCallbacks = {};
+  private reconnectAttempts = 0;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private audioThrottleInterval: NodeJS.Timeout | null = null;
   private audioBuffer: Uint8Array[] = [];
-  private responseCallbacks: ((response: InterviewRoomResponse) => void)[] = [];
-  private errorCallbacks: ((error: Error) => void)[] = [];
-  private connectCallbacks: (() => void)[] = [];
-  private disconnectCallbacks: (() => void)[] = [];
-  private isConnectionInProgress = false;
-  private sessionAuthToken: string | null = null;
-  private roomId: string;
+  private isRecording = false;
+  private audioContext: AudioContext | null = null;
+  private audioSource: MediaStreamAudioSourceNode | null = null;
+  private audioProcessor: ScriptProcessorNode | null = null;
+  private audioStream: MediaStream | null = null;
+  private audioChunks: Uint8Array[] = [];
+  private audioStartTime: number | null = null;
+  private audioDuration = 0;
+  private audioFormat = 'audio/webm';
+  private isConnecting = false;
+  private connectionTimeout: NodeJS.Timeout | null = null;
 
-  private constructor(roomId: string, config: Partial<ConnectionConfig> = {}) {
-    this.url = getWebSocketUrl(roomId);
-    this.config = { ...DEFAULT_CONFIG, ...config };
+  private constructor(roomId: string, token: string, config: Partial<ConnectionConfig> = {}) {
     this.roomId = roomId;
+    this.token = token;
+    this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
-  /**
-   * Get or create a singleton instance of the WebSocket connection
-   * @param roomId The interview room ID
-   * @param config Optional configuration
-   * @returns The WebSocket instance
-   */
   public static getInstance(
     roomId: string,
+    token: string,
     config?: Partial<ConnectionConfig>
   ): InterviewRoomSocket {
-    if (!roomId) {
-      throw new Error('Room ID is required');
+    if (!this.instances.has(roomId)) {
+      this.instances.set(roomId, new InterviewRoomSocket(roomId, token, config));
     }
-
-    const key = roomId;
-    if (!instances.has(key)) {
-      const instance = new InterviewRoomSocket(roomId, config);
-      instances.set(key, instance);
-      // Connect immediately after creation
-      instance.connect();
-    }
-    return instances.get(key)!;
+    return this.instances.get(roomId)!;
   }
 
-  /**
-   * Get authentication token from session
-   * Caches the token to reduce session requests
-   */
-  private async getAuthToken(): Promise<string> {
-    if (this.sessionAuthToken) {
-      return this.sessionAuthToken;
-    }
+  public connect(): void {
+    if (!isBrowser || this.ws?.readyState === WebSocket.OPEN || this.isConnecting) return;
 
-    const session = await getSession();
-    if (!session?.accessToken) {
-      throw new WebSocketError('Authentication token not found', 'AUTH_ERROR');
-    }
-
-    this.sessionAuthToken = session.accessToken;
-    return session.accessToken;
+    this.isConnecting = true;
+    this.setupConnectionTimeout();
+    this.initializeWebSocket();
   }
 
-  /**
-   * Establish the WebSocket connection with authentication
-   */
-  public async connect(): Promise<void> {
-    if (
-      this.isConnectionInProgress ||
-      this.state === WebSocketState.CONNECTING ||
-      this.state === WebSocketState.OPEN
-    ) {
-      return;
-    }
+  private setupConnectionTimeout(): void {
+    this.connectionTimeout = setTimeout(() => {
+      if (this.isConnecting) {
+        this.isConnecting = false;
+        this.ws?.close();
+        this.callbacks.onError?.(new Error('Connection timeout'));
+      }
+    }, 10000);
+  }
 
-    try {
-      this.isConnectionInProgress = true;
-      this.state = WebSocketState.CONNECTING;
+  private initializeWebSocket(): void {
+    const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+    const wsUrl = `${wsBaseUrl}/ws/interview-room/${this.roomId}?token=${this.token}`;
 
-      const token = await this.getAuthToken();
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Connecting to WebSocket: ${wsUrl}`,
+    });
 
-      const wsUrl = new URL(this.url);
-      wsUrl.searchParams.append('token', token);
-
-      this.ws = new WebSocket(wsUrl.toString());
-      this.setupWebSocketHandlers();
-    } catch (error) {
-      this.state = WebSocketState.CLOSED;
-      this.handleError(
-        error instanceof WebSocketError
-          ? error
-          : new WebSocketError('Connection failed', 'CONNECTION_ERROR')
-      );
-    } finally {
-      this.isConnectionInProgress = false;
-    }
+    this.ws = new WebSocket(wsUrl);
+    this.setupWebSocketHandlers();
   }
 
   private setupWebSocketHandlers(): void {
     if (!this.ws) return;
 
-    this.ws.onopen = () => {
-      this.state = WebSocketState.OPEN;
-      this.reconnectAttempts = 0;
-      this.startHeartbeat();
-      this.startAudioThrottle();
-      this.connectCallbacks.forEach(callback => callback());
-    };
-
-    this.ws.onclose = (event: CloseEvent) => {
-      this.state = WebSocketState.CLOSED;
-      this.stopHeartbeat();
-      this.stopAudioThrottle();
-
-      if (event.code === 1008) {
-        // Auth error
-        this.sessionAuthToken = null;
-        this.handleError(new WebSocketError('Authentication failed', 'AUTH_ERROR'));
-      } else if (event.code !== 1000 && event.code !== 1001) {
-        // Don't reconnect for normal closures (1000, 1001)
-        this.handleDisconnect(event);
-      }
-    };
-
-    this.ws.onerror = () => {
-      // Error handling is done in onclose event
-    };
-
-    this.ws.onmessage = (event: MessageEvent) => {
-      try {
-        this.handleMessage(event);
-      } catch (error) {
-        sendLog({
-          level: ELogLevels.Error,
-          message: 'Error handling WebSocket message',
-          err: error as Error,
-        });
-      }
-    };
+    this.ws.onopen = this.handleWebSocketOpen.bind(this);
+    this.ws.onclose = this.handleWebSocketClose.bind(this);
+    this.ws.onerror = this.handleWebSocketError.bind(this);
+    this.ws.onmessage = this.handleWebSocketMessage.bind(this);
   }
 
-  private handleMessage(event: MessageEvent): void {
-    try {
-      const response: InterviewRoomResponse = JSON.parse(event.data);
-      sendLog({
-        level: ELogLevels.Info,
-        message: `Received WebSocket message: ${JSON.stringify(response)}`,
-      });
-      this.responseCallbacks.forEach(callback => callback(response));
-    } catch (error) {
-      this.handleError(new WebSocketError('Failed to parse message', 'PARSE_ERROR'));
+  private handleWebSocketOpen(): void {
+    this.clearConnectionTimeout();
+    this.isConnecting = false;
+    this.reconnectAttempts = 0;
+    this.startHeartbeat();
+    this.startAudioThrottle();
+    this.callbacks.onConnect?.();
+  }
+
+  private handleWebSocketClose(event: CloseEvent): void {
+    this.clearConnectionTimeout();
+    this.isConnecting = false;
+    this.stopHeartbeat();
+    this.stopAudioThrottle();
+
+    if (event.code === 1008) {
+      this.callbacks.onError?.(new Error('Authentication failed'));
+      return;
     }
+
+    this.callbacks.onDisconnect?.();
+    this.handleReconnect();
   }
 
-  private handleDisconnect(event: CloseEvent): void {
-    this.disconnectCallbacks.forEach(callback => callback());
-
-    if (this.reconnectAttempts < this.config.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = this.config.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-      setTimeout(() => this.connect(), delay);
-    } else {
-      this.handleError(new WebSocketError('Max reconnection attempts reached', 'MAX_RECONNECT'));
-    }
-  }
-
-  private handleError(error: WebSocketError): void {
-    this.errorCallbacks.forEach(callback => callback(error));
+  private handleWebSocketError(error: Event): void {
+    this.clearConnectionTimeout();
+    this.isConnecting = false;
     sendLog({
       level: ELogLevels.Error,
-      message: `WebSocket error: ${error.code}`,
-      err: error,
+      message: 'WebSocket connection error',
+      err: new Error('WebSocket connection failed'),
     });
+    this.callbacks.onError?.(new Error('WebSocket connection failed'));
+  }
+
+  private handleWebSocketMessage(event: MessageEvent): void {
+    try {
+      const message = JSON.parse(event.data) as WebSocketMessage;
+      this.handleMessage(message);
+    } catch (error) {
+      this.callbacks.onError?.(error);
+    }
+  }
+
+  private clearConnectionTimeout(): void {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+      this.connectionTimeout = null;
+    }
+  }
+
+  private handleReconnect(): void {
+    if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+      this.callbacks.onError?.(new Error('Max reconnection attempts reached'));
+      return;
+    }
+
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    this.reconnectTimeout = setTimeout(() => {
+      this.reconnectAttempts++;
+      this.connect();
+    }, delay);
   }
 
   private startHeartbeat(): void {
-    this.stopHeartbeat();
     this.heartbeatInterval = setInterval(() => {
-      if (this.ws?.readyState === WebSocket.OPEN) {
-        const heartbeatMessage: HeartbeatMessage = {
-          type: MessageType.HEARTBEAT,
-          command: CommandType.HEARTBEAT,
-          payload: {
-            client_timestamp: Date.now(),
-          },
-          timestamp: Date.now(),
-        };
-        this.ws.send(JSON.stringify(heartbeatMessage));
-        sendLog({
-          level: ELogLevels.Info,
-          message: 'Sent heartbeat message',
-        });
-      }
+      const heartbeatMessage: WebSocketMessage<HeartbeatPayload> = {
+        type: MessageType.HEARTBEAT,
+        command: CommandType.HEARTBEAT,
+        payload: {
+          client_timestamp: Date.now(),
+        },
+        timestamp: Date.now(),
+      };
+
+      this.ws?.send(JSON.stringify(heartbeatMessage));
+      sendLog({
+        level: ELogLevels.Info,
+        message: 'Sent heartbeat message',
+      });
     }, this.config.heartbeatDelay);
   }
 
@@ -275,201 +210,399 @@ export class InterviewRoomSocket {
     }
   }
 
-  /**
-   * Start audio throttle interval to send batched audio chunks
-   */
   private startAudioThrottle(): void {
-    this.stopAudioThrottle();
     this.audioThrottleInterval = setInterval(() => {
       this.flushAudioBuffer();
     }, this.config.audioThrottleInterval);
   }
 
-  /**
-   * Stop audio throttle interval
-   */
   private stopAudioThrottle(): void {
     if (this.audioThrottleInterval) {
       clearInterval(this.audioThrottleInterval);
       this.audioThrottleInterval = null;
     }
-    // Flush any remaining audio chunks
     this.flushAudioBuffer();
   }
 
-  /**
-   * Flush audio buffer by sending all accumulated chunks
-   */
   private flushAudioBuffer(): void {
-    if (this.audioBuffer.length === 0 || this.ws?.readyState !== WebSocket.OPEN) {
-      return;
-    }
+    if (this.audioBuffer.length === 0 || this.ws?.readyState !== WebSocket.OPEN) return;
 
-    // Convert binary audio chunks to Base64 strings for JSON serialization
-    const base64Chunks = this.audioBuffer.map(chunk =>
-      btoa(String.fromCharCode.apply(null, Array.from(chunk)))
-    );
+    const base64Chunks = this.audioBuffer.map(chunk => {
+      const binary = Array.from(chunk)
+        .map(byte => String.fromCharCode(byte))
+        .join('');
+      return btoa(binary);
+    });
 
-    // Create the audio message with the new protocol
-    const message: AudioMessage = {
-      type: MessageType.SYSTEM_MESSAGE,
-      command: CommandType.SPEAK,
+    const message: WebSocketMessage<AudioPayload> = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.AUDIO_STREAM,
       payload: {
         audio_chunks: base64Chunks,
-        format: 'audio/webm', // Or whatever format is appropriate
+        format: this.audioFormat,
       },
       timestamp: Date.now(),
     };
 
-    try {
-      this.ws?.send(JSON.stringify(message));
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Sent ${base64Chunks.length} audio chunks`,
+    });
 
+    this.audioBuffer = [];
+  }
+
+  private handleMessage(message: WebSocketMessage): void {
+    switch (message.type) {
+      case MessageType.CONNECTION:
+        this.handleConnectionMessage(message as WebSocketMessage<ConnectionPayload>);
+        break;
+      case MessageType.HEARTBEAT:
+        this.handleHeartbeatMessage(message as WebSocketMessage<HeartbeatPayload>);
+        break;
+      case MessageType.INTERVIEW_CONTROL:
+        this.handleInterviewControlMessage(message);
+        break;
+      case MessageType.ERROR:
+        this.handleErrorMessage(message as WebSocketMessage<ErrorPayload>);
+        break;
+      default:
+        sendLog({
+          level: ELogLevels.Warning,
+          message: `Unknown message type: ${message.type}`,
+        });
+    }
+  }
+
+  private handleConnectionMessage(message: WebSocketMessage<ConnectionPayload>): void {
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Connection established: ${message.payload.message}`,
+    });
+  }
+
+  private handleHeartbeatMessage(message: WebSocketMessage<HeartbeatPayload>): void {
+    if (message.command === CommandType.HEARTBEAT_RESPONSE) {
+      const latency = Date.now() - message.payload.client_timestamp;
       sendLog({
         level: ELogLevels.Info,
-        message: `Sent ${this.audioBuffer.length} audio chunks for command ${CommandType.SPEAK}`,
-      });
-
-      // Clear the buffer after successful send
-      this.audioBuffer = [];
-    } catch (error) {
-      sendLog({
-        level: ELogLevels.Error,
-        message: 'Failed to send audio chunks',
-        err: error as Error,
+        message: `Heartbeat response received. Latency: ${latency}ms`,
       });
     }
   }
 
-  /**
-   * Buffer audio chunk for throttled sending
-   * @param audioChunk Binary audio chunk
-   */
-  public sendSpeakCommand(audioChunk: Uint8Array): void {
-    // Add chunk to buffer
-    this.audioBuffer.push(audioChunk);
-
-    // If buffer exceeds maximum size, flush immediately
-    if (this.audioBuffer.length >= this.config.maxAudioBufferSize) {
-      this.flushAudioBuffer();
-    }
-
-    // If not connected and not connecting, try to connect
-    if (this.state === WebSocketState.CLOSED) {
-      this.connect();
-    }
-  }
-
-  /**
-   * Send user response over the WebSocket
-   * @param response User response object
-   */
-  public sendUserResponse(response: UserResponsePayload): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      const message: UserResponseMessage = {
-        type: MessageType.USER_RESPONSE,
-        command: CommandType.USER_RESPONSE,
-        payload: response,
-        timestamp: Date.now(),
-      };
-      this.ws.send(JSON.stringify(message));
-      sendLog({
-        level: ELogLevels.Info,
-        message: `Sent user response: ${JSON.stringify(response)}`,
-      });
-    } else if (this.state !== WebSocketState.CONNECTING) {
-      this.connect();
+  private handleInterviewControlMessage(message: WebSocketMessage): void {
+    switch (message.command) {
+      case CommandType.QUESTION_DATA:
+        this.handleQuestionData(message as WebSocketMessage<QuestionPayload>);
+        break;
+      case CommandType.GET_PARTIAL_SOLUTION:
+        this.handleGetPartialSolution();
+        break;
+      case CommandType.INTERRUPTION:
+        this.handleInterruption(message.payload);
+        break;
+      case CommandType.SOLUTION_SAVED:
+        this.handleSolutionSaved(message as WebSocketMessage<SolutionSavedPayload>);
+        break;
+      case CommandType.INTERVIEW_COMPLETED:
+        this.handleInterviewCompleted(message.payload);
+        break;
+      default:
+        sendLog({
+          level: ELogLevels.Warning,
+          message: `Unknown interview control command: ${message.command}`,
+        });
     }
   }
 
-  /**
-   * Request all solution data from the server
-   */
-  public getAllSolutionData(): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      const message: WebSocketMessage<SystemPayload> = {
-        type: MessageType.SYSTEM_MESSAGE,
-        command: CommandType.GET_ALL_SOLUTION_DATA,
-        payload: {},
-        timestamp: Date.now(),
-      };
-      this.ws.send(JSON.stringify(message));
-      sendLog({
-        level: ELogLevels.Info,
-        message: 'Requested all solution data',
-      });
-    } else if (this.state !== WebSocketState.CONNECTING) {
-      this.connect();
-    }
+  private handleQuestionData(message: WebSocketMessage<QuestionPayload>): void {
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Received question data: ${message.payload.question.question}`,
+    });
+    this.callbacks.onResponse?.({
+      type: MessageType.INTERVIEW_CONTROL,
+      command: CommandType.QUESTION_DATA,
+      message: message.payload.message,
+      question: {
+        id: message.payload.question.question_id,
+        question_text: message.payload.question.question,
+        question_type: message.payload.question.question_type,
+        solution_type: message.payload.question.solution_type,
+      },
+      is_interview_completed: false,
+    });
   }
 
-  /**
-   * Register a callback for WebSocket responses
-   * @param callback Function to call when a response is received
-   */
-  public onResponse(callback: (response: InterviewRoomResponse) => void): void {
-    this.responseCallbacks.push(callback);
+  private handleGetPartialSolution(): void {
+    const currentSolution: UserResponsePayload = {
+      text_response: this.getCurrentTextResponse(),
+      code_response: this.getCurrentCodeResponse(),
+      image_response: this.getCurrentImageResponse(),
+      audio_response: this.getCurrentAudioResponse(),
+    };
+
+    const message: WebSocketMessage<UserResponsePayload> = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.PARTIAL_SOLUTION,
+      payload: currentSolution,
+      timestamp: Date.now(),
+    };
+
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: 'Sent partial solution',
+    });
   }
 
-  /**
-   * Register a callback for WebSocket errors
-   * @param callback Function to call when an error occurs
-   */
-  public onError(callback: (error: Error) => void): void {
-    this.errorCallbacks.push(callback);
+  private handleInterruption(payload: unknown): void {
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Received interruption: ${JSON.stringify(payload)}`,
+    });
   }
 
-  /**
-   * Register a callback for WebSocket connection
-   * @param callback Function to call when connected
-   */
-  public onConnect(callback: () => void): void {
-    this.connectCallbacks.push(callback);
-    if (this.state === WebSocketState.OPEN) {
-      callback();
-    }
+  private handleSolutionSaved(message: WebSocketMessage<SolutionSavedPayload>): void {
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Solution saved: ${message.payload.message}`,
+    });
   }
 
-  /**
-   * Register a callback for WebSocket disconnection
-   * @param callback Function to call when disconnected
-   */
-  public onDisconnect(callback: () => void): void {
-    this.disconnectCallbacks.push(callback);
-  }
+  private handleInterviewCompleted(payload: unknown): void {
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Interview completed: ${JSON.stringify(payload)}`,
+    });
 
-  /**
-   * Manually disconnect the WebSocket
-   */
-  public disconnect(): void {
-    this.state = WebSocketState.CLOSING;
-    this.stopHeartbeat();
-    this.stopAudioThrottle();
+    // Close the WebSocket connection
     if (this.ws) {
-      this.ws.close(1000, 'Client disconnected');
+      this.ws.close();
       this.ws = null;
     }
-    this.state = WebSocketState.CLOSED;
+
+    // Clean up all resources
+    this.cleanup();
+
+    // Notify the callback with completion status
+    this.callbacks.onResponse?.({
+      type: MessageType.INTERVIEW_CONTROL,
+      command: CommandType.INTERVIEW_COMPLETED,
+      message: 'Interview completed',
+      is_interview_completed: true,
+    });
   }
 
-  /**
-   * Clean up all resources and callbacks
-   */
+  private handleErrorMessage(message: WebSocketMessage<ErrorPayload>): void {
+    sendLog({
+      level: ELogLevels.Error,
+      message: `WebSocket error: ${message.payload.message}`,
+      err: new Error(message.payload.message),
+    });
+    this.callbacks.onError?.(new Error(message.payload.message));
+  }
+
+  public requestNextQuestion(): void {
+    const message: WebSocketMessage = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.REQUEST_NEXT,
+      payload: {},
+      timestamp: Date.now(),
+    };
+
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: 'Requested next question',
+    });
+  }
+
+  public sendCompleteSolution(solution: UserResponsePayload): void {
+    const message: WebSocketMessage<UserResponsePayload> = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.COMPLETE_SOLUTION,
+      payload: solution,
+      timestamp: Date.now(),
+    };
+
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: 'Sent complete solution',
+    });
+  }
+
+  public startRecording(): void {
+    if (!isBrowser) return;
+    if (this.isRecording) return;
+
+    // Clean up any existing audio resources first
+    this.cleanupAudioResources();
+
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(stream => {
+        this.audioStream = stream;
+        this.audioContext = new AudioContext();
+        this.audioSource = this.audioContext.createMediaStreamSource(stream);
+        this.audioProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
+
+        this.audioProcessor.onaudioprocess = e => {
+          if (!this.isRecording) return;
+
+          const inputData = e.inputBuffer.getChannelData(0);
+          const pcmData = new Uint8Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            pcmData[i] = (inputData[i] + 1) * 128;
+          }
+          this.audioChunks.push(pcmData);
+        };
+
+        this.audioSource.connect(this.audioProcessor);
+        this.audioProcessor.connect(this.audioContext.destination);
+
+        this.isRecording = true;
+        this.audioStartTime = Date.now();
+        this.audioChunks = [];
+
+        sendLog({
+          level: ELogLevels.Info,
+          message: 'Started recording audio',
+        });
+      })
+      .catch(error => {
+        this.cleanupAudioResources();
+        sendLog({
+          level: ELogLevels.Error,
+          message: 'Error starting audio recording:',
+          err: error,
+        });
+        this.callbacks.onError?.(error);
+      });
+  }
+
+  public stopRecording(): void {
+    if (!isBrowser) return;
+    if (!this.isRecording) return;
+
+    this.isRecording = false;
+    this.audioDuration = (Date.now() - (this.audioStartTime || 0)) / 1000;
+
+    // Convert audio chunks to base64 before cleaning up
+    const base64Chunks = this.audioChunks.map(chunk => {
+      const binary = Array.from(chunk)
+        .map(byte => String.fromCharCode(byte))
+        .join('');
+      return btoa(binary);
+    });
+
+    const message: WebSocketMessage<AudioPayload> = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.AUDIO_STREAM,
+      payload: {
+        audio_chunks: base64Chunks,
+        format: this.audioFormat,
+        duration: this.audioDuration,
+      },
+      timestamp: Date.now(),
+    };
+
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Sent audio data: ${base64Chunks.length} chunks, duration: ${this.audioDuration}s`,
+    });
+
+    // Clean up audio resources
+    this.cleanupAudioResources();
+  }
+
+  private cleanupAudioResources(): void {
+    if (!isBrowser) return;
+
+    if (this.audioProcessor) {
+      this.audioProcessor.disconnect();
+      this.audioProcessor = null;
+    }
+
+    if (this.audioSource) {
+      this.audioSource.disconnect();
+      this.audioSource = null;
+    }
+
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
+
+    if (this.audioStream) {
+      this.audioStream.getTracks().forEach(track => track.stop());
+      this.audioStream = null;
+    }
+
+    this.audioChunks = [];
+    this.audioStartTime = null;
+    this.audioDuration = 0;
+  }
+
+  public isRecordingActive(): boolean {
+    return this.isRecording;
+  }
+
+  private getCurrentTextResponse(): string | undefined {
+    // Implement based on your state management
+    return undefined;
+  }
+
+  private getCurrentCodeResponse(): string | undefined {
+    // Implement based on your state management
+    return undefined;
+  }
+
+  private getCurrentImageResponse(): string | undefined {
+    // Implement based on your state management
+    return undefined;
+  }
+
+  private getCurrentAudioResponse(): string | undefined {
+    // Implement based on your state management
+    return undefined;
+  }
+
+  public onConnect(callback: () => void): void {
+    this.callbacks.onConnect = callback;
+  }
+
+  public onDisconnect(callback: () => void): void {
+    this.callbacks.onDisconnect = callback;
+  }
+
+  public onError(callback: (error: unknown) => void): void {
+    this.callbacks.onError = callback;
+  }
+
+  public onResponse(callback: (response: InterviewRoomResponse) => void): void {
+    this.callbacks.onResponse = callback;
+  }
+
   public cleanup(): void {
-    this.disconnect();
-    this.responseCallbacks = [];
-    this.errorCallbacks = [];
-    this.connectCallbacks = [];
-    this.disconnectCallbacks = [];
-    this.sessionAuthToken = null;
-    this.audioBuffer = [];
-    instances.delete(this.url);
-  }
-
-  /**
-   * Get the current connection state
-   * @returns Current WebSocket state
-   */
-  public getState(): WebSocketState {
-    return this.state;
+    this.stopHeartbeat();
+    this.stopAudioThrottle();
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+    }
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+    this.cleanupAudioResources();
+    this.isConnecting = false;
+    InterviewRoomSocket.instances.delete(this.roomId);
   }
 }
