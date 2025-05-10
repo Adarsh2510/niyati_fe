@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import UnSupportedBrowser from './UnSupportedBrowser';
 import { TUserResponse } from '@/lib/api/types';
 import {
@@ -30,12 +29,6 @@ import { ESolutionType } from '@/constants/interview';
 
 const isBrowser = typeof window !== 'undefined';
 
-enum ESubmitBtnStates {
-  INITIAL = 'Record Answer',
-  SUBMIT = 'Submit Response',
-  ERROR = 'Error',
-}
-
 interface InterviewControllersProps {
   handleNextQuestion: () => void;
   handleUserResponse: (response: UserResponsePayload) => void;
@@ -49,21 +42,14 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   className,
   interviewId,
 }) => {
-  const [submitBtnLabel, setSubmitBtnLabel] = useState(ESubmitBtnStates.INITIAL);
-  const [isMounted, setIsMounted] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [socket, setSocket] = useState<InterviewRoomSocket | null>(null);
 
   const { data: session } = useSession();
   const setCurrentQuestion = useSetAtom(currentQuestionAtom);
-  const userTextResponse = useAtomValue(userTextResponseAtom);
-  const userImageResponse = useAtomValue(userImageResponseAtom);
-  const userCodeResponse = useAtomValue(userCodeResponseAtom);
-  const router = useRouter();
 
-  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+  const router = useRouter();
 
   const handleSocketResponse = useCallback(
     (response: InterviewRoomResponse) => {
@@ -168,38 +154,13 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     }
   };
 
-  const handleSubmitAnswer = () => {
-    if (!isBrowser) return;
-
-    if (submitBtnLabel === ESubmitBtnStates.INITIAL) {
-      setSubmitBtnLabel(ESubmitBtnStates.SUBMIT);
-      SpeechRecognition.startListening({ continuous: true });
-    } else if (submitBtnLabel === ESubmitBtnStates.SUBMIT) {
-      SpeechRecognition.stopListening();
-      sendLog({ level: ELogLevels.Info, message: `Transcript: ${transcript}` });
-      handleUserResponse({
-        audio_response: transcript,
-        text_response: userTextResponse,
-        image_response: userImageResponse,
-        code_response: userCodeResponse,
-      });
-      resetTranscript();
-      setSubmitBtnLabel(ESubmitBtnStates.INITIAL);
-    }
-  };
-
   const handleRecordingChange = (recording: boolean) => {
     if (!isBrowser) return;
     setIsRecording(recording);
     recording ? socket?.startRecording() : socket?.stopRecording();
   };
 
-  useEffect(() => {
-    if (!isBrowser) return;
-    setIsMounted(true);
-  }, []);
-
-  if (!isBrowser || (isMounted && !browserSupportsSpeechRecognition)) {
+  if (!isBrowser) {
     return <UnSupportedBrowser />;
   }
 
@@ -220,17 +181,6 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
       >
         <RefreshCw className={`w-4 h-4 ${isRepeating ? 'animate-spin' : ''}`} />
         Repeat Question
-      </Button>
-      <Button
-        variant="destructive"
-        className={
-          submitBtnLabel === ESubmitBtnStates.SUBMIT
-            ? 'bg-red-700 hover:bg-red-500'
-            : 'bg-red-500 hover:bg-red-600'
-        }
-        onClick={handleSubmitAnswer}
-      >
-        {submitBtnLabel}
       </Button>
       {socket && (
         <MicrophoneController

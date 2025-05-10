@@ -605,4 +605,22 @@ export class InterviewRoomSocket {
     this.isConnecting = false;
     InterviewRoomSocket.instances.delete(this.roomId);
   }
+
+  public sendAudioData(audioChunks: string[]): void {
+    const message: WebSocketMessage<AudioPayload> = {
+      type: MessageType.INTERVIEW_ACTION,
+      command: CommandType.AUDIO_STREAM,
+      payload: {
+        audio_chunks: audioChunks,
+        format: this.audioFormat,
+      },
+      timestamp: Date.now(),
+    };
+
+    this.ws?.send(JSON.stringify(message));
+    sendLog({
+      level: ELogLevels.Info,
+      message: `Sent audio data: ${audioChunks.length} chunks`,
+    });
+  }
 }

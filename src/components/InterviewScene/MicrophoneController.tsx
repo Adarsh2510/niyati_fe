@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { InterviewRoomSocket } from '@/lib/socket/InterviewRoomSocket';
 import { toast } from 'sonner';
 import { sendLog } from '@/utils/logs';
@@ -10,49 +10,43 @@ interface MicrophoneControllerProps {
   onRecordingChange: (isRecording: boolean) => void;
 }
 
-// Audio constraints for better quality
-const AUDIO_CONSTRAINTS = {
-  audio: {
-    echoCancellation: true,
-    noiseSuppression: true,
-    autoGainControl: true,
-    sampleRate: 44100,
-    channelCount: 1,
-  },
+const AUDIO_CONFIG = {
+  mimeType: 'audio/webm;codecs=opus' as const,
+  audioBitsPerSecond: 128000,
+  chunkInterval: 500, // 500ms chunks
 };
-
-// Time between audio chunks in ms
-const RECORDING_INTERVAL = 100;
 
 const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
   socket,
   isRecording,
   onRecordingChange,
 }) => {
-  const [isMicAvailable, setIsMicAvailable] = useState<boolean>(false);
+  const [isMicAvailable, setIsMicAvailable] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [isBrowser, setIsBrowser] = useState(false);
 
-  // Get best supported MIME type for audio recording
-  const getSupportedMimeType = useCallback(() => {
-    const preferredTypes = [
-      'audio/webm;codecs=opus', // Best quality and compression for WebM
-      'audio/ogg;codecs=opus', // Good quality and compression for Firefox
-      'audio/webm', // Fallback for Chrome
-      'audio/mp4', // Fallback for Safari
-    ];
-
-    return preferredTypes.find(type => MediaRecorder.isTypeSupported(type)) || '';
+  useEffect(() => {
+    setIsBrowser(true);
   }, []);
 
-  // Check and request microphone access
+  const checkBrowserSupport = useCallback(() => {
+    if (!isBrowser) return false;
+    if (!MediaRecorder.isTypeSupported(AUDIO_CONFIG.mimeType)) {
+      toast.error('Your browser does not support WebM with Opus codec');
+      return false;
+    }
+    return true;
+  }, [isBrowser]);
+
   const checkMicrophoneAvailability = useCallback(async () => {
+    if (!isBrowser) return false;
     try {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       setIsMicAvailable(true);
       return true;
@@ -66,10 +60,17 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
       toast.error('Microphone access is required');
       return false;
     }
-  }, []);
+  }, [isBrowser]);
 
-  // Safely stop recording and cleanup resources
+  // Check microphone availability when component mounts
+  useEffect(() => {
+    if (isBrowser) {
+      checkMicrophoneAvailability();
+    }
+  }, [isBrowser, checkMicrophoneAvailability]);
+
   const stopRecording = useCallback(() => {
+    if (!isBrowser) return;
     if (mediaRecorderRef.current?.state !== 'inactive') {
       try {
         mediaRecorderRef.current?.stop();
@@ -89,22 +90,19 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
 
     mediaRecorderRef.current = null;
     onRecordingChange(false);
-  }, [onRecordingChange]);
+  }, [onRecordingChange, isBrowser]);
 
-  // Begin audio recording with optimal settings
   const startRecording = useCallback(async () => {
+    if (!isBrowser) return;
+    if (!checkBrowserSupport()) return;
+
     const micAvailable = await checkMicrophoneAvailability();
     if (!micAvailable) return;
 
     try {
-      const mimeType = getSupportedMimeType();
-      if (!mimeType) {
-        throw new Error('No supported audio format found');
-      }
-
       const mediaRecorder = new MediaRecorder(streamRef.current!, {
-        mimeType,
-        audioBitsPerSecond: 128000,
+        mimeType: AUDIO_CONFIG.mimeType,
+        audioBitsPerSecond: AUDIO_CONFIG.audioBitsPerSecond,
       });
       mediaRecorderRef.current = mediaRecorder;
 
@@ -112,11 +110,19 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
         if (event.data.size > 0) {
           try {
             const arrayBuffer = await event.data.arrayBuffer();
-            socket.sendSpeakCommand(new Uint8Array(arrayBuffer));
+            const uint8Array = new Uint8Array(arrayBuffer);
+            const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+
+            sendLog({
+              level: ELogLevels.Info,
+              message: `Sending audio chunk: ${event.data.size} bytes`,
+            });
+
+            socket.sendAudioData([base64Audio]);
           } catch (error) {
             sendLog({
               level: ELogLevels.Error,
-              message: 'Error processing audio data',
+              message: 'Error processing audio chunk',
               err: error as Error,
             });
           }
@@ -133,7 +139,7 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
         stopRecording();
       };
 
-      mediaRecorder.start(RECORDING_INTERVAL);
+      mediaRecorder.start(AUDIO_CONFIG.chunkInterval);
       onRecordingChange(true);
     } catch (error) {
       sendLog({
@@ -144,20 +150,27 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
       toast.error('Error starting audio recording');
       stopRecording();
     }
-  }, [checkMicrophoneAvailability, getSupportedMimeType, socket, onRecordingChange, stopRecording]);
+  }, [
+    checkBrowserSupport,
+    checkMicrophoneAvailability,
+    onRecordingChange,
+    stopRecording,
+    socket,
+    isBrowser,
+  ]);
 
   const toggleRecording = useCallback(() => {
+    if (!isBrowser) return;
     if (isRecording) {
       stopRecording();
     } else {
       startRecording();
     }
-  }, [isRecording, startRecording, stopRecording]);
+  }, [isRecording, startRecording, stopRecording, isBrowser]);
 
-  useEffect(() => {
-    checkMicrophoneAvailability();
-    return () => stopRecording();
-  }, [checkMicrophoneAvailability, stopRecording]);
+  if (!isBrowser) {
+    return null;
+  }
 
   if (!isMicAvailable) {
     return (

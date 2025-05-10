@@ -1,9 +1,14 @@
-import { useState } from 'react';
-import { Excalidraw } from '@excalidraw/excalidraw';
-import '@excalidraw/excalidraw/index.css';
-import { excalidrawRefAtom } from './atoms';
+import { useState, Suspense, lazy } from 'react';
 import { useAtom } from 'jotai';
+import { excalidrawRefAtom } from './atoms';
 import { ExcalidrawAPI } from './utils';
+
+// Lazy load the Excalidraw component
+const Excalidraw = lazy(() =>
+  import('@excalidraw/excalidraw').then(module => ({
+    default: module.Excalidraw,
+  }))
+);
 
 const WhiteboardCanvas = () => {
   const [initialData] = useState({
@@ -27,23 +32,33 @@ const WhiteboardCanvas = () => {
           boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Excalidraw
-          excalidrawAPI={api => {
-            excalidrawRef.current = api as unknown as ExcalidrawAPI;
-          }}
-          initialData={initialData as any}
-          name="Whiteboard"
-          aiEnabled={false}
-          UIOptions={{
-            canvasActions: {
-              export: false,
-              saveAsImage: false,
-              saveToActiveFile: false,
-              loadScene: false,
-              clearCanvas: true,
-            },
-          }}
-        />
+        <Suspense
+          fallback={
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <div className="text-gray-500">Loading whiteboard...</div>
+            </div>
+          }
+        >
+          <Excalidraw
+            excalidrawAPI={(api: unknown) => {
+              if (excalidrawRef) {
+                excalidrawRef.current = api as ExcalidrawAPI;
+              }
+            }}
+            initialData={initialData as any}
+            name="Whiteboard"
+            aiEnabled={false}
+            UIOptions={{
+              canvasActions: {
+                export: false,
+                saveAsImage: false,
+                saveToActiveFile: false,
+                loadScene: false,
+                clearCanvas: true,
+              },
+            }}
+          />
+        </Suspense>
       </div>
     </div>
   );
