@@ -80,13 +80,16 @@ export interface ConnectionPayload {
 
 export interface QuestionPayload {
   question: {
-    question_id: string;
-    question: string;
-    question_type: 'INITIAL' | 'FOLLOW_UP';
-    solution_type: SolutionType;
+    question_name: string;
+    question_text: string;
+    question_test_cases: string[];
   };
   message: string;
   reason: string;
+  question_type: 'INITIAL' | 'FOLLOW_UP';
+  solution_type: SolutionType;
+  is_last_question: boolean;
+  is_interview_completed: boolean;
 }
 
 export interface SolutionSavedPayload {
@@ -140,21 +143,16 @@ export interface SolutionSavedMessage extends WebSocketMessage<SolutionSavedPayl
 
 // Legacy interfaces for backward compatibility
 export interface IntQuestions {
-  id: string;
+  question_name: string;
   question_text: string;
+  question_test_cases: string[];
   question_type: string;
   solution_type: SolutionType;
 }
 
 export interface InterviewRoomResponse {
   type: MessageType;
-  message: string;
-  room_id?: string;
-  user_id?: string;
   command: CommandType;
-  question?: IntQuestions;
-  is_interview_completed: boolean;
-  solution_type?: SolutionType;
-  payload?: unknown;
-  timestamp?: number;
+  payload: QuestionPayload;
+  timestamp: number;
 }

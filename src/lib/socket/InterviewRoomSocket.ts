@@ -12,6 +12,7 @@ import {
   QuestionPayload,
   SolutionSavedPayload,
   InterviewRoomResponse,
+  SolutionType,
 } from '@/types/interview';
 
 interface WebSocketCallbacks {
@@ -320,19 +321,25 @@ export class InterviewRoomSocket {
   private handleQuestionData(message: WebSocketMessage<QuestionPayload>): void {
     sendLog({
       level: ELogLevels.Info,
-      message: `Received question data: ${message.payload.question.question}`,
+      message: `Received question data: ${message.payload.question.question_text}`,
     });
     this.callbacks.onResponse?.({
       type: MessageType.INTERVIEW_CONTROL,
       command: CommandType.QUESTION_DATA,
-      message: message.payload.message,
-      question: {
-        id: message.payload.question.question_id,
-        question_text: message.payload.question.question,
-        question_type: message.payload.question.question_type,
-        solution_type: message.payload.question.solution_type,
+      payload: {
+        question: {
+          question_name: message.payload.question.question_name,
+          question_text: message.payload.question.question_text,
+          question_test_cases: message.payload.question.question_test_cases,
+        },
+        question_type: message.payload.question_type,
+        solution_type: message.payload.solution_type,
+        is_last_question: message.payload.is_last_question,
+        is_interview_completed: false,
+        message: message.payload.message,
+        reason: message.payload.reason,
       },
-      is_interview_completed: false,
+      timestamp: Date.now(),
     });
   }
 
@@ -391,8 +398,20 @@ export class InterviewRoomSocket {
     this.callbacks.onResponse?.({
       type: MessageType.INTERVIEW_CONTROL,
       command: CommandType.INTERVIEW_COMPLETED,
-      message: 'Interview completed',
-      is_interview_completed: true,
+      payload: {
+        is_interview_completed: true,
+        message: 'Interview completed',
+        reason: 'Interview has been completed successfully',
+        question_type: 'INITIAL',
+        solution_type: SolutionType.TEXT_ANSWER,
+        is_last_question: true,
+        question: {
+          question_name: '',
+          question_text: '',
+          question_test_cases: [],
+        },
+      },
+      timestamp: Date.now(),
     });
   }
 

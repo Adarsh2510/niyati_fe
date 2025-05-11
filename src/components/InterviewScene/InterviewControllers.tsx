@@ -1,13 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import UnSupportedBrowser from './UnSupportedBrowser';
 import { TUserResponse } from '@/lib/api/types';
-import {
-  userCodeResponseAtom,
-  userImageResponseAtom,
-  userTextResponseAtom,
-  currentQuestionAtom,
-} from './AnswerBoardTools/atoms';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { currentQuestionAtom } from './AnswerBoardTools/atoms';
+import { useSetAtom } from 'jotai';
 import { Button } from '../ui/button';
 import { getCurrentQuestion } from '@/lib/api/getInterviewData';
 import { RefreshCw } from 'lucide-react';
@@ -17,12 +12,7 @@ import { toast } from 'sonner';
 import MicrophoneController from './MicrophoneController';
 import { InterviewRoomSocket } from '@/lib/socket/InterviewRoomSocket';
 import { useSession } from 'next-auth/react';
-import {
-  InterviewRoomResponse,
-  MessageType,
-  CommandType,
-  UserResponsePayload,
-} from '@/types/interview';
+import { InterviewRoomResponse, UserResponsePayload } from '@/types/interview';
 import { useRouter } from 'next/navigation';
 import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
@@ -45,46 +35,41 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const [isRepeating, setIsRepeating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [socket, setSocket] = useState<InterviewRoomSocket | null>(null);
-
   const { data: session } = useSession();
   const setCurrentQuestion = useSetAtom(currentQuestionAtom);
-
   const router = useRouter();
 
   const handleSocketResponse = useCallback(
     (response: InterviewRoomResponse) => {
-      if (response.is_interview_completed) {
+      const { payload } = response;
+
+      if (payload.is_interview_completed) {
         router.push(`/dashboard/interview-room/${interviewId}/summary`);
         return;
       }
 
-      if (response.question) {
-        const questionType =
-          response.question.question_type === 'FOLLOW_UP'
-            ? QuestionType.FOLLOW_UP
-            : QuestionType.INITIAL;
+      if (!payload.question) return;
 
-        const solutionType =
-          response.question.solution_type === 'CODE_SOLUTION'
-            ? ESolutionType.CODE_SOLUTION
-            : response.question.solution_type === 'WHITEBOARD_IMAGE'
-              ? ESolutionType.WHITEBOARD_IMAGE
-              : response.question.solution_type === 'CODE_REPO_WITH_OUTPUT'
-                ? ESolutionType.CODE_REPO_WITH_OUTPUT
-                : ESolutionType.TEXT_ANSWER;
+      const questionType =
+        payload.question_type === 'FOLLOW_UP' ? QuestionType.FOLLOW_UP : QuestionType.INITIAL;
+      const solutionType = mapSolutionType(payload.solution_type);
 
-        setCurrentQuestion({
-          current_question: {
-            question_name: response.question.question_text,
-            question_text: response.question.question_text,
-            question_test_cases: [],
-          },
-          question_type: questionType,
-          solution_type: solutionType,
-          is_last_question: false,
-          is_interview_completed: false,
-        });
-      }
+      setCurrentQuestion({
+        current_question: {
+          question_name: payload.question.question_name,
+          question_text: payload.question.question_text,
+          question_test_cases: payload.question.question_test_cases,
+        },
+        question_type: questionType,
+        solution_type: solutionType,
+        is_last_question: payload.is_last_question,
+        is_interview_completed: payload.is_interview_completed,
+      });
+
+      sendLog({
+        level: ELogLevels.Info,
+        message: `Received new question: ${payload.question.question_text}`,
+      });
     },
     [interviewId, router, setCurrentQuestion]
   );
@@ -118,12 +103,10 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
 
   useEffect(() => {
     if (!isBrowser) return;
-
     const setupSocket = async () => {
       const socketInstance = await initializeSocket();
       return () => socketInstance?.cleanup();
     };
-
     setupSocket();
   }, [initializeSocket]);
 
@@ -160,16 +143,22 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     recording ? socket?.startRecording() : socket?.stopRecording();
   };
 
-  if (!isBrowser) {
-    return <UnSupportedBrowser />;
-  }
+  const handleStartInterview = () => {
+    if (!socket) {
+      toast.error('Not connected to interview room');
+      return;
+    }
+    socket.requestNextQuestion();
+  };
+
+  if (!isBrowser) return <UnSupportedBrowser />;
 
   return (
     <div className={`flex gap-4 justify-center ${className}`}>
       <Button
         variant="default"
         className="bg-green-500 hover:bg-green-600"
-        onClick={handleNextQuestion}
+        onClick={handleStartInterview}
       >
         Start Interview
       </Button>
@@ -191,6 +180,20 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
       )}
     </div>
   );
+};
+
+// Helper function to map solution types
+const mapSolutionType = (type: string): ESolutionType => {
+  switch (type) {
+    case 'CODE_SOLUTION':
+      return ESolutionType.CODE_SOLUTION;
+    case 'WHITEBOARD_IMAGE':
+      return ESolutionType.WHITEBOARD_IMAGE;
+    case 'CODE_REPO_WITH_OUTPUT':
+      return ESolutionType.CODE_REPO_WITH_OUTPUT;
+    default:
+      return ESolutionType.TEXT_ANSWER;
+  }
 };
 
 export default InterviewControllers;

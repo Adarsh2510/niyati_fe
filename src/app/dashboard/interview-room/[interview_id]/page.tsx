@@ -7,7 +7,7 @@ import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
 import QuestionSection from '@/components/InterviewScene/QuestionSection';
 import InterviewControllers from '@/components/InterviewScene/InterviewControllers';
-import { getNextQuestion, submitAnswer } from '@/lib/api/getInterviewData';
+import { submitAnswer } from '@/lib/api/getInterviewData';
 import { TUserResponse } from '@/lib/api/types';
 import { redirect } from 'next/navigation';
 import DashboardHeader from '@/components/common/DashboardHeader';
@@ -26,7 +26,6 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
   const excalidrawRef = useAtomValue(excalidrawRefAtom);
-  // const questionType = useRef<QuestionType>(QuestionType.INITIAL);
   const followUpQuestionId = useRef<string | null>(null);
   const answerBoardPlaceholder = useMemo(() => {
     const questionText = currentQuestion?.current_question?.question_text;
@@ -35,21 +34,6 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
           answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER]
       : answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER];
   }, [currentQuestion, solutionType]);
-
-  const handleNextQuestion = async () => {
-    getNextQuestion({ user_id: 'test-user-id', interview_id: interview_id }).then(data => {
-      if (data.is_interview_completed) {
-        setCurrentQuestion(undefined);
-        setIsInterviewCompleted(true);
-      } else if (data.next_question) {
-        setCurrentQuestion({
-          ...data,
-          current_question: data.next_question,
-        });
-        setSolutionType(data.solution_type);
-      }
-    });
-  };
 
   const handleSubmitAnswer = (answer: TUserResponse) => {
     console.log('recieved answer', answer);
@@ -72,17 +56,6 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
         });
       } else {
         followUpQuestionId.current = null;
-        getNextQuestion({ user_id: 'test-user-id', interview_id: interview_id }).then(data => {
-          if (data.is_interview_completed) {
-            setCurrentQuestion(undefined);
-            setIsInterviewCompleted(true);
-          } else if (data.next_question) {
-            setCurrentQuestion({
-              ...data,
-              current_question: data.next_question,
-            });
-          }
-        });
       }
     });
   };
@@ -104,7 +77,7 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
         answerBoardPlaceholder={answerBoardPlaceholder}
       />
       <InterviewControllers
-        handleNextQuestion={handleNextQuestion}
+        handleNextQuestion={() => {}}
         handleUserResponse={handleUserResponse}
         className="p-2 bg-gray-100 border-t"
         interviewId={interview_id}
