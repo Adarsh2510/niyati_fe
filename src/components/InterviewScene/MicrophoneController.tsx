@@ -3,6 +3,13 @@ import { InterviewRoomSocket } from '@/lib/socket/InterviewRoomSocket';
 import { toast } from 'sonner';
 import { sendLog } from '@/utils/logs';
 import { ELogLevels } from '@/constants/logs';
+import { useAtomValue } from 'jotai';
+import {
+  userCodeResponseAtom,
+  userImageResponseAtom,
+  userTextResponseAtom,
+} from './AnswerBoardTools/atoms';
+import { CommandType } from '@/types/interview';
 
 interface MicrophoneControllerProps {
   socket: InterviewRoomSocket;
@@ -13,7 +20,7 @@ interface MicrophoneControllerProps {
 const AUDIO_CONFIG = {
   mimeType: 'audio/webm;codecs=opus' as const,
   audioBitsPerSecond: 128000,
-  chunkInterval: 500, // 500ms chunks
+  chunkInterval: 500,
 };
 
 const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
@@ -21,26 +28,76 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
   isRecording,
   onRecordingChange,
 }) => {
-  const [isMicAvailable, setIsMicAvailable] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isBrowser, setIsBrowser] = useState(false);
+
+  const codeResponse = useAtomValue(userCodeResponseAtom);
+  const imageResponse = useAtomValue(userImageResponseAtom);
+  const textResponse = useAtomValue(userTextResponseAtom);
 
   useEffect(() => {
     setIsBrowser(true);
   }, []);
 
-  const checkBrowserSupport = useCallback(() => {
-    if (!isBrowser) return false;
+  const cleanupResources = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        track.enabled = false;
+      });
+      streamRef.current = null;
+    }
+    mediaRecorderRef.current = null;
+    onRecordingChange(false);
+  }, [onRecordingChange]);
+
+  const sendUserResponse = useCallback(() => {
+    socket.sendCompleteSolution(
+      {
+        text_response: textResponse,
+        code_response: codeResponse,
+        image_response: imageResponse,
+      },
+      CommandType.PARTIAL_SOLUTION
+    );
+  }, [socket, textResponse, codeResponse, imageResponse]);
+
+  const stopRecording = useCallback(async () => {
+    if (!isBrowser) return;
+
+    if (mediaRecorderRef.current?.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current?.stop();
+        await new Promise<void>(resolve => {
+          mediaRecorderRef.current!.onstop = () => {
+            cleanupResources();
+            sendUserResponse();
+            resolve();
+          };
+        });
+      } catch (error) {
+        sendLog({
+          level: ELogLevels.Error,
+          message: 'Error stopping recording',
+          err: error as Error,
+        });
+        cleanupResources();
+      }
+    } else {
+      cleanupResources();
+      sendUserResponse();
+    }
+  }, [isBrowser, cleanupResources, sendUserResponse]);
+
+  const startRecording = useCallback(async () => {
+    if (!isBrowser) return;
+
     if (!MediaRecorder.isTypeSupported(AUDIO_CONFIG.mimeType)) {
       toast.error('Your browser does not support WebM with Opus codec');
-      return false;
+      return;
     }
-    return true;
-  }, [isBrowser]);
 
-  const checkMicrophoneAvailability = useCallback(async () => {
-    if (!isBrowser) return false;
     try {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -48,63 +105,11 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      setIsMicAvailable(true);
-      return true;
-    } catch (error) {
-      sendLog({
-        level: ELogLevels.Error,
-        message: 'Microphone not available',
-        err: error as Error,
-      });
-      setIsMicAvailable(false);
-      toast.error('Microphone access is required');
-      return false;
-    }
-  }, [isBrowser]);
 
-  // Check microphone availability when component mounts
-  useEffect(() => {
-    if (isBrowser) {
-      checkMicrophoneAvailability();
-    }
-  }, [isBrowser, checkMicrophoneAvailability]);
-
-  const stopRecording = useCallback(() => {
-    if (!isBrowser) return;
-    if (mediaRecorderRef.current?.state !== 'inactive') {
-      try {
-        mediaRecorderRef.current?.stop();
-      } catch (error) {
-        sendLog({
-          level: ELogLevels.Error,
-          message: 'Error stopping recording',
-          err: error as Error,
-        });
-      }
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    mediaRecorderRef.current = null;
-    onRecordingChange(false);
-  }, [onRecordingChange, isBrowser]);
-
-  const startRecording = useCallback(async () => {
-    if (!isBrowser) return;
-    if (!checkBrowserSupport()) return;
-
-    const micAvailable = await checkMicrophoneAvailability();
-    if (!micAvailable) return;
-
-    try {
-      const mediaRecorder = new MediaRecorder(streamRef.current!, {
+      const mediaRecorder = new MediaRecorder(stream, {
         mimeType: AUDIO_CONFIG.mimeType,
         audioBitsPerSecond: AUDIO_CONFIG.audioBitsPerSecond,
       });
-      mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = async event => {
         if (event.data.size > 0) {
@@ -112,12 +117,6 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
             const arrayBuffer = await event.data.arrayBuffer();
             const uint8Array = new Uint8Array(arrayBuffer);
             const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
-
-            sendLog({
-              level: ELogLevels.Info,
-              message: `Sending audio chunk: ${event.data.size} bytes`,
-            });
-
             socket.sendAudioData([base64Audio]);
           } catch (error) {
             sendLog({
@@ -129,16 +128,12 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
         }
       };
 
-      mediaRecorder.onerror = event => {
-        sendLog({
-          level: ELogLevels.Error,
-          message: 'MediaRecorder error',
-          err: event as unknown as Error,
-        });
+      mediaRecorder.onerror = () => {
         toast.error('Error recording audio');
         stopRecording();
       };
 
+      mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start(AUDIO_CONFIG.chunkInterval);
       onRecordingChange(true);
     } catch (error) {
@@ -148,37 +143,16 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
         err: error as Error,
       });
       toast.error('Error starting audio recording');
-      stopRecording();
+      cleanupResources();
     }
-  }, [
-    checkBrowserSupport,
-    checkMicrophoneAvailability,
-    onRecordingChange,
-    stopRecording,
-    socket,
-    isBrowser,
-  ]);
+  }, [isBrowser, socket, stopRecording, onRecordingChange, cleanupResources]);
 
   const toggleRecording = useCallback(() => {
     if (!isBrowser) return;
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-  }, [isRecording, startRecording, stopRecording, isBrowser]);
+    isRecording ? stopRecording() : startRecording();
+  }, [isBrowser, isRecording, startRecording, stopRecording]);
 
-  if (!isBrowser) {
-    return null;
-  }
-
-  if (!isMicAvailable) {
-    return (
-      <div className="p-4 bg-red-100 text-red-700 rounded-lg" role="alert">
-        <p className="font-medium">Microphone access is required</p>
-      </div>
-    );
-  }
+  if (!isBrowser) return null;
 
   return (
     <div className="flex items-center gap-4 p-4 bg-gray-100 rounded-lg">

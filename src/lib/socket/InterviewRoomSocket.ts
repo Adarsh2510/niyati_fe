@@ -439,10 +439,10 @@ export class InterviewRoomSocket {
     });
   }
 
-  public sendCompleteSolution(solution: UserResponsePayload): void {
+  public sendCompleteSolution(solution: UserResponsePayload, command: CommandType): void {
     const message: WebSocketMessage<UserResponsePayload> = {
       type: MessageType.INTERVIEW_ACTION,
-      command: CommandType.COMPLETE_SOLUTION,
+      command: command,
       payload: solution,
       timestamp: Date.now(),
     };
@@ -450,7 +450,7 @@ export class InterviewRoomSocket {
     this.ws?.send(JSON.stringify(message));
     sendLog({
       level: ELogLevels.Info,
-      message: 'Sent complete solution',
+      message: `Sent ${command} complete solution`,
     });
   }
 
@@ -535,6 +535,14 @@ export class InterviewRoomSocket {
       message: `Sent audio data: ${base64Chunks.length} chunks, duration: ${this.audioDuration}s`,
     });
 
+    // Ensure all audio tracks are stopped
+    if (this.audioStream) {
+      this.audioStream.getTracks().forEach(track => {
+        track.stop();
+        track.enabled = false;
+      });
+    }
+
     // Clean up audio resources
     this.cleanupAudioResources();
   }
@@ -558,13 +566,17 @@ export class InterviewRoomSocket {
     }
 
     if (this.audioStream) {
-      this.audioStream.getTracks().forEach(track => track.stop());
+      this.audioStream.getTracks().forEach(track => {
+        track.stop();
+        track.enabled = false;
+      });
       this.audioStream = null;
     }
 
     this.audioChunks = [];
     this.audioStartTime = null;
     this.audioDuration = 0;
+    this.isRecording = false;
   }
 
   public isRecordingActive(): boolean {
