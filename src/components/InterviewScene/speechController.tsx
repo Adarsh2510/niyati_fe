@@ -1,68 +1,55 @@
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
 
-export const speakQuestion = ({
-  questionText,
+export const speakText = ({
+  text,
   setIsSpeaking,
   setCurrentWordIndex,
 }: {
-  questionText: string;
+  text: string;
   setIsSpeaking: (isSpeaking: boolean) => void;
   setCurrentWordIndex: (index: number) => void;
 }) => {
   if (typeof window === 'undefined') return;
+  if (!text) return;
 
-  if (questionText) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(questionText);
-    sendLog({
-      level: ELogLevels.Info,
-      message: 'Speaking question:' + questionText,
-    });
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  sendLog({ level: ELogLevels.Info, message: 'Speaking: ' + text });
+  utterance.lang = 'en-US';
+  utterance.pitch = 1;
+  utterance.rate = 1;
 
-    utterance.lang = 'en-US';
-    utterance.pitch = 1;
-    utterance.rate = 1;
+  let wordIndex = 0;
+  utterance.onboundary = event => {
+    if (event.name === 'word') {
+      setCurrentWordIndex(wordIndex);
+      wordIndex++;
+    }
+  };
 
-    let currentWordIndex = 0;
+  utterance.onstart = () => {
+    sendLog({ level: ELogLevels.Info, message: 'Speech started' });
+    setIsSpeaking(true);
+    wordIndex = 0;
+    setCurrentWordIndex(-1);
+  };
 
-    utterance.onboundary = event => {
-      if (event.name === 'word') {
-        setCurrentWordIndex(currentWordIndex);
-        currentWordIndex++;
-      }
-    };
+  utterance.onend = () => {
+    sendLog({ level: ELogLevels.Info, message: 'Speech ended' });
+    setIsSpeaking(false);
+    setCurrentWordIndex(-1);
+  };
 
-    utterance.onstart = () => {
+  utterance.onerror = event => {
+    if (event.error !== 'interrupted') {
       sendLog({
-        level: ELogLevels.Info,
-        message: 'Speech started',
+        level: ELogLevels.Error,
+        message: 'Speech error:',
+        err: event as unknown as Error,
       });
-      setIsSpeaking(true);
-      // Reset the current word index when starting new speech
-      currentWordIndex = 0;
-      setCurrentWordIndex(-1);
-    };
+    }
+  };
 
-    utterance.onend = () => {
-      sendLog({
-        level: ELogLevels.Info,
-        message: 'Speech ended',
-      });
-      setIsSpeaking(false);
-      setCurrentWordIndex(-1);
-    };
-    utterance.onerror = event => {
-      // Ignore errors with "interrupted" message as they're expected when canceling speech
-      if (event.error !== 'interrupted') {
-        sendLog({
-          level: ELogLevels.Error,
-          message: 'Speech error:',
-          err: event as unknown as Error,
-        });
-      }
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }
+  window.speechSynthesis.speak(utterance);
 };

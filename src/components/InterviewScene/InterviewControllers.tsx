@@ -1,8 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import UnSupportedBrowser from './UnSupportedBrowser';
 import { TUserResponse } from '@/lib/api/types';
-import { currentQuestionAtom } from './AnswerBoardTools/atoms';
-import { useSetAtom } from 'jotai';
+import {
+  currentQuestionAtom,
+  interruptionMessageAtom,
+  isInterruptionSpeakingAtom,
+  interruptionWordIndexAtom,
+  interruptionStateAtom,
+} from './AnswerBoardTools/atoms';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Button } from '../ui/button';
 import { getCurrentQuestion } from '@/lib/api/getInterviewData';
 import { RefreshCw } from 'lucide-react';
@@ -16,6 +22,8 @@ import { InterviewRoomResponse, UserResponsePayload } from '@/types/interview';
 import { useRouter } from 'next/navigation';
 import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
+import { speakText } from './speechController';
+import Caption from './Caption';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -38,6 +46,12 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const { data: session } = useSession();
   const setCurrentQuestion = useSetAtom(currentQuestionAtom);
   const router = useRouter();
+
+  // Use the unified interruption state
+  const interruptionState = useAtomValue(interruptionStateAtom);
+  const setInterruptionMessage = useSetAtom(interruptionMessageAtom);
+  const setIsInterruptionSpeaking = useSetAtom(isInterruptionSpeakingAtom);
+  const setInterruptionWordIndex = useSetAtom(interruptionWordIndexAtom);
 
   const handleSocketResponse = useCallback(
     (response: InterviewRoomResponse) => {
@@ -95,11 +109,28 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     });
 
     newSocket.onResponse(handleSocketResponse);
+
+    newSocket.onInterruption(interruption => {
+      setInterruptionMessage({ message: interruption.message, _repeatId: Math.random() });
+      speakText({
+        text: interruption.message,
+        setIsSpeaking: setIsInterruptionSpeaking,
+        setCurrentWordIndex: setInterruptionWordIndex,
+      });
+    });
+
     newSocket.connect();
     setSocket(newSocket);
 
     return newSocket;
-  }, [interviewId, session?.accessToken, handleSocketResponse]);
+  }, [
+    interviewId,
+    session?.accessToken,
+    handleSocketResponse,
+    setInterruptionMessage,
+    setIsInterruptionSpeaking,
+    setInterruptionWordIndex,
+  ]);
 
   useEffect(() => {
     if (!isBrowser) return;
@@ -154,31 +185,39 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   if (!isBrowser) return <UnSupportedBrowser />;
 
   return (
-    <div className={`flex gap-4 justify-center ${className}`}>
-      <Button
-        variant="default"
-        className="bg-green-500 hover:bg-green-600"
-        onClick={handleStartInterview}
-      >
-        Start Interview
-      </Button>
-      <Button
-        variant="outline"
-        className="flex items-center gap-2"
-        onClick={handleRepeatQuestion}
-        disabled={isRepeating}
-      >
-        <RefreshCw className={`w-4 h-4 ${isRepeating ? 'animate-spin' : ''}`} />
-        Repeat Question
-      </Button>
-      {socket && (
-        <MicrophoneController
-          socket={socket}
-          isRecording={isRecording}
-          onRecordingChange={handleRecordingChange}
-        />
-      )}
-    </div>
+    <>
+      <div className={`flex gap-4 justify-center ${className}`}>
+        <Button
+          variant="default"
+          className="bg-green-500 hover:bg-green-600"
+          onClick={handleStartInterview}
+        >
+          Start Interview
+        </Button>
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={handleRepeatQuestion}
+          disabled={isRepeating}
+        >
+          <RefreshCw className={`w-4 h-4 ${isRepeating ? 'animate-spin' : ''}`} />
+          Repeat Question
+        </Button>
+        {socket && (
+          <MicrophoneController
+            socket={socket}
+            isRecording={isRecording}
+            onRecordingChange={handleRecordingChange}
+          />
+        )}
+      </div>
+      <Caption
+        key={interruptionState._repeatId}
+        text={interruptionState.message ?? ''}
+        isSpeaking={interruptionState.isSpeaking}
+        currentWordIndex={interruptionState.wordIndex}
+      />
+    </>
   );
 };
 

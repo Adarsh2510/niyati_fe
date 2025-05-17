@@ -20,6 +20,7 @@ interface WebSocketCallbacks {
   onDisconnect?: () => void;
   onError?: (error: unknown) => void;
   onResponse?: (response: InterviewRoomResponse) => void;
+  onInterruption?: (interruption: { message: string; reason: string }) => void;
 }
 
 interface ConnectionConfig {
@@ -366,10 +367,15 @@ export class InterviewRoomSocket {
   }
 
   private handleInterruption(payload: unknown): void {
+    const interruptionPayload = payload as { message: string; reason: string };
     sendLog({
       level: ELogLevels.Info,
-      message: `Received interruption: ${JSON.stringify(payload)}`,
+      message: `Received interruption: ${JSON.stringify(interruptionPayload)}`,
     });
+
+    if (this.callbacks.onInterruption) {
+      this.callbacks.onInterruption(interruptionPayload);
+    }
   }
 
   private handleSolutionSaved(message: WebSocketMessage<SolutionSavedPayload>): void {
@@ -617,6 +623,12 @@ export class InterviewRoomSocket {
 
   public onResponse(callback: (response: InterviewRoomResponse) => void): void {
     this.callbacks.onResponse = callback;
+  }
+
+  public onInterruption(
+    callback: (interruption: { message: string; reason: string }) => void
+  ): void {
+    this.callbacks.onInterruption = callback;
   }
 
   public cleanup(): void {

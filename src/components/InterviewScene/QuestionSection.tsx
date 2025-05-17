@@ -1,4 +1,4 @@
-import { speakQuestion } from './speechController';
+import { speakText } from './speechController';
 import { useEffect, useState, useMemo } from 'react';
 import {
   currentQuestionAtom,
@@ -14,7 +14,7 @@ import WhiteboardCanvas from './AnswerBoardTools/WhiteboardCanvas';
 import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { toast } from 'sonner';
 import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
-import QuestionCaption from './QuestionCaption';
+import Caption from './Caption';
 
 function InterviewerAvatarCanvas() {
   // const backgroundImage = useTexture('/meeting-room.webp');
@@ -63,10 +63,12 @@ const QuestionSection = ({
   const questionTestCases = currentQuestion?.current_question?.question_test_cases;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
   const setCurrentWordIndex = useSetAtom(currentWordIndexAtom);
+  const isSpeaking = useAtomValue(isSpeakingAtom);
+  const currentWordIndex = useAtomValue(currentWordIndexAtom);
 
   useEffect(() => {
-    speakQuestion({
-      questionText: questionText ?? '',
+    speakText({
+      text: questionText ?? '',
       setIsSpeaking,
       setCurrentWordIndex,
     });
@@ -96,7 +98,12 @@ const QuestionSection = ({
           {answerBoardComponent}
         </div>
       </div>
-      <QuestionCaption />
+      <Caption
+        key={currentQuestion?._repeatId}
+        text={questionText ?? ''}
+        isSpeaking={isSpeaking}
+        currentWordIndex={currentWordIndex}
+      />
     </>
   );
 };
