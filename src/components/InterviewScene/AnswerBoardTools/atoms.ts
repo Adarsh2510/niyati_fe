@@ -5,6 +5,7 @@ import { IGetCurrentQuestionResponse } from '@/lib/api/types';
 import { createExcalidrawRef } from './utils';
 
 export const isSpeakingAtom = atom(false);
+export const isRecordingAtom = atom(false);
 export const userTextResponseAtom = atom('');
 export const userImageResponseAtom = atom('');
 export const userCodeResponseAtom = atom('');
@@ -13,6 +14,7 @@ export const currentQuestionAtom = atom<
 >(null);
 export const currentWordIndexAtom = atom(-1);
 export const excalidrawRefAtom = atom(createExcalidrawRef());
+export const isAudioChunkSentAtom = atom(false);
 
 // Unified interruption state
 export const interruptionStateAtom = atom<{

@@ -7,11 +7,11 @@ import {
   isInterruptionSpeakingAtom,
   interruptionWordIndexAtom,
   interruptionStateAtom,
+  isRecordingAtom,
+  isAudioChunkSentAtom,
 } from './AnswerBoardTools/atoms';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Button } from '../ui/button';
-import { getCurrentQuestion } from '@/lib/api/getInterviewData';
-import { RefreshCw } from 'lucide-react';
 import { ELogLevels } from '@/constants/logs';
 import { sendLog } from '@/utils/logs';
 import { toast } from 'sonner';
@@ -24,6 +24,8 @@ import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
 import { speakText } from './speechController';
 import Caption from './Caption';
+import { CommandType } from '@/types/interview';
+import { useSolutionSender } from './AnswerBoardTools/useSolutionSender';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -40,11 +42,11 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   className,
   interviewId,
 }) => {
-  const [isRepeating, setIsRepeating] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording] = useAtom(isRecordingAtom);
+  const [isAudioChunkSent, setIsAudioChunkSent] = useAtom(isAudioChunkSentAtom);
   const [socket, setSocket] = useState<InterviewRoomSocket | null>(null);
   const { data: session } = useSession();
-  const setCurrentQuestion = useSetAtom(currentQuestionAtom);
+  const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const router = useRouter();
 
   // Use the unified interruption state
@@ -79,6 +81,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         is_last_question: payload.is_last_question,
         is_interview_completed: payload.is_interview_completed,
       });
+      setIsAudioChunkSent(false);
 
       sendLog({
         level: ELogLevels.Info,
@@ -141,37 +144,10 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     setupSocket();
   }, [initializeSocket]);
 
-  const handleRepeatQuestion = async () => {
-    if (!isBrowser) return;
-
-    setIsRepeating(true);
-    try {
-      const currentQuestion = await getCurrentQuestion({
-        user_id: 'test-user-id',
-        interview_id: interviewId,
-      });
-      if (currentQuestion.current_question) {
-        setCurrentQuestion({
-          ...currentQuestion,
-          _repeatId: Math.random(),
-        });
-      }
-    } catch (error) {
-      toast.error('Error repeating question');
-      sendLog({
-        level: ELogLevels.Error,
-        message: 'Error repeating question:',
-        err: error as Error,
-      });
-    } finally {
-      setIsRepeating(false);
-    }
-  };
-
+  // Manage recording state; actual audio streaming handled by MediaRecorder in MicrophoneController
   const handleRecordingChange = (recording: boolean) => {
     if (!isBrowser) return;
     setIsRecording(recording);
-    recording ? socket?.startRecording() : socket?.stopRecording();
   };
 
   const handleStartInterview = () => {
@@ -182,32 +158,49 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     socket.requestNextQuestion();
   };
 
-  if (!isBrowser) return <UnSupportedBrowser />;
+  const sendSolution = useSolutionSender(socket);
 
+  if (!isBrowser) return <UnSupportedBrowser />;
+  const isInterviewStarted = !!currentQuestion?.current_question?.question_text;
+  console.log('isAudioChunkSent', isAudioChunkSent);
   return (
     <>
-      <div className={`flex gap-4 justify-center ${className}`}>
+      <div className={`flex gap-4 items-center justify-center h-16 ${className}`}>
         <Button
           variant="default"
+          disabled={isInterviewStarted}
           className="bg-green-500 hover:bg-green-600"
           onClick={handleStartInterview}
         >
           Start Interview
         </Button>
         <Button
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={handleRepeatQuestion}
-          disabled={isRepeating}
+          variant="default"
+          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted}
+          className={`bg-blue-500 hover:bg-blue-600`}
+          onClick={() => {
+            sendSolution(CommandType.COMPLETE_SOLUTION);
+          }}
         >
-          <RefreshCw className={`w-4 h-4 ${isRepeating ? 'animate-spin' : ''}`} />
-          Repeat Question
+          Submit Solution
+        </Button>
+        <Button
+          variant="outline"
+          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted}
+          className={`bg-purple-500 hover:bg-purple-600`}
+          onClick={() => {
+            sendSolution(CommandType.PARTIAL_SOLUTION);
+            setIsAudioChunkSent(false);
+          }}
+        >
+          Provoke Interviewer
         </Button>
         {socket && (
           <MicrophoneController
             socket={socket}
             isRecording={isRecording}
             onRecordingChange={handleRecordingChange}
+            setIsAudioChunkSent={setIsAudioChunkSent}
           />
         )}
       </div>
