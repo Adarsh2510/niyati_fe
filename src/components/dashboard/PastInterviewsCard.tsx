@@ -1,64 +1,53 @@
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { GetPastInterviewsResponse } from '@/lib/api/types';
+import Conditional from '../Conditional';
 
-async function getPastInterviews() {
-  // TODO: Replace with actual API call
-  return [
-    {
-      id: '1',
-      title: 'Frontend Developer Interview',
-      date: 'Jan 20, 2024',
-      score: 8,
-    },
-    {
-      id: '2',
-      title: 'System Design Discussion',
-      date: 'Jan 15, 2024',
-      score: 8,
-    },
-    {
-      id: '3',
-      title: 'JavaScript Fundamentals',
-      date: 'Jan 10, 2024',
-      score: 9,
-    },
-    {
-      id: '4',
-      title: 'React Interview',
-      date: 'Jan 5, 2024',
-      score: 9,
-    },
-  ];
+interface PastInterviewsCardProps {
+  interviews: GetPastInterviewsResponse['interviews'];
 }
 
-export async function PastInterviewsCard() {
-  const interviews = await getPastInterviews();
+export function PastInterviewsCard({ interviews }: PastInterviewsCardProps) {
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-4">Past Interviews</h2>
       <ScrollArea className="h-[200px] w-full pr-4">
-        <div>
-          {interviews.map(interview => (
-            <Link
-              key={interview.id}
-              href={`/dashboard/interview-room/${interview.id}/summary`}
-              className="block"
-            >
-              <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <div>
-                  <h3 className="font-medium">{interview.title}</h3>
-                  <p className="text-sm text-gray-500">{interview.date}</p>
+        <Conditional if={interviews.length === 0}>
+          <div className="h-full flex items-center justify-center">
+            <p className="text-gray-500 text-center mx-auto">
+              Looks like you haven&apos;t given any interviews yet. Let&apos;s get started!
+            </p>
+          </div>
+        </Conditional>
+        <Conditional if={interviews.length > 0}>
+          <div>
+            {interviews.map(interview => (
+              <Link
+                key={interview.interview_id}
+                href={`/dashboard/interview-room/${interview.interview_id}/summary`}
+                className="block"
+              >
+                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <div>
+                    <h3 className="font-medium">{interview.name}</h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(interview.date)
+                        .toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                        })
+                        .replace(' ', ', ')}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium">{Math.round(interview.score * 10)}%</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">
-                    {Math.round((interview.score / 10) * 100)}%
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </Conditional>
       </ScrollArea>
     </Card>
   );

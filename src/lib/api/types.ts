@@ -76,3 +76,12 @@ export type TGetInterviewSummaryResponse = {
 export type TInterviewRoomResponse = {
   interview_id: string;
 };
+
+export interface GetPastInterviewsResponse {
+  interviews: Array<{
+    interview_id: string;
+    name: string;
+    date: string;
+    score: number;
+  }>;
+}
