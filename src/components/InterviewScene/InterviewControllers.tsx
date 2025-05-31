@@ -60,6 +60,10 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
       const { payload } = response;
 
       if (payload.is_interview_completed) {
+        if (socket) {
+          socket.cleanup();
+          setSocket(null);
+        }
         router.push(`/dashboard/interview-room/${interviewId}/summary`);
         return;
       }
@@ -139,10 +143,25 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     if (!isBrowser) return;
     const setupSocket = async () => {
       const socketInstance = await initializeSocket();
-      return () => socketInstance?.cleanup();
+      return () => {
+        if (socketInstance) {
+          socketInstance.cleanup();
+          setSocket(null);
+        }
+      };
     };
     setupSocket();
   }, [initializeSocket]);
+
+  // Add cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (socket) {
+        socket.cleanup();
+        setSocket(null);
+      }
+    };
+  }, [socket]);
 
   // Manage recording state; actual audio streaming handled by MediaRecorder in MicrophoneController
   const handleRecordingChange = (recording: boolean) => {
