@@ -1,43 +1,35 @@
-'use client';
+import Header from '@/components/common/Header';
+import HeroSection from '@/components/landing/HeroSection';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import PricingSection from '@/components/landing/PricingSection';
+import CTABanner from '@/components/landing/CTABanner';
+import ExtendedFooter from '@/components/landing/ExtendedFooter';
+import EngineerLogo from '@/assets/engineer.svg';
 
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-
-export default function Home() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
-  }
-
+export default function LandingPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <h1 className="mb-8 text-4xl font-bold">Welcome to Niyati</h1>
-      <p className="mb-8 text-center text-lg">Your AI-powered interview preparation platform</p>
-      <div className="flex gap-4">
-        <Link href="/login">
-          <Button size="lg">Sign In</Button>
-        </Link>
-        <Link href="/signup">
-          <Button size="lg" variant="outline">
-            Create Account
-          </Button>
-        </Link>
-      </div>
-    </main>
+    <>
+      <Header
+        logoSrc={EngineerLogo}
+        logoAlt="Niyati Logo"
+        brandName="Niyati Prep"
+        navLinks={[
+          { label: 'Features', href: '#features' },
+          { label: 'How It Works', href: '#how-it-works' },
+          { label: 'Pricing', href: '#pricing' },
+          { label: 'Testimonials', href: '#testimonials' },
+        ]}
+        cta={{ label: 'Go to Dashboard', href: '/dashboard' }}
+      />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <PricingSection />
+      <CTABanner />
+      <ExtendedFooter />
+    </>
   );
 }
