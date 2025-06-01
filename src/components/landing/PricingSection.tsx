@@ -1,5 +1,6 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CheckIcon } from 'lucide-react';
 
 const plans = [
   {
@@ -12,7 +13,7 @@ const plans = [
       'Email support',
     ],
     cta: 'Get Started',
-    highlight: false,
+    highlight: null,
   },
   {
     name: 'Pro',
@@ -26,7 +27,7 @@ const plans = [
       'Priority support',
     ],
     cta: 'Get Started',
-    highlight: true,
+    highlight: 'Most Popular',
   },
   {
     name: 'Enterprise',
@@ -39,7 +40,7 @@ const plans = [
       'Custom integrations',
     ],
     cta: 'Get Started',
-    highlight: false,
+    highlight: null,
   },
 ];
 
@@ -50,31 +51,50 @@ export default function PricingSection() {
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Choose Your Plan</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, idx) => (
-            <Card
-              key={idx}
-              className={`p-6 flex flex-col items-center text-center border border-gray-100 shadow-sm ${plan.highlight ? 'ring-2 ring-blue-500' : ''}`}
-            >
-              {plan.highlight && (
-                <div className="mb-2 text-xs font-semibold text-blue-600 uppercase">
-                  Most Popular
+            <div key={idx} className="relative">
+              {plan?.highlight && (
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-6 py-1.5 rounded-full font-medium text-sm z-10">
+                  {plan.highlight}
                 </div>
               )}
-              <CardTitle className="mb-2 text-lg font-semibold">{plan.name}</CardTitle>
-              <div className="mb-4 text-3xl font-bold">
-                {plan.price}
-                {plan.priceSuffix && (
-                  <span className="text-base font-normal">{plan.priceSuffix}</span>
-                )}
-              </div>
-              <ul className="mb-6 text-gray-600 text-sm space-y-2">
-                {plan.features.map((feature, i) => (
-                  <li key={i}>&#10003; {feature}</li>
-                ))}
-              </ul>
-              <Button size="lg" variant={plan.highlight ? 'default' : 'outline'}>
-                {plan.cta}
-              </Button>
-            </Card>
+              <Card
+                className={`relative h-full p-6 flex flex-col border ${
+                  plan.highlight
+                    ? 'border-blue-500 rounded-xl shadow-md bg-gradient-to-br from-white to-blue-50'
+                    : 'border-gray-200 shadow-sm'
+                }`}
+              >
+                <CardTitle className="mb-2 text-xl font-bold">{plan.name}</CardTitle>
+                <div className="mb-6 flex items-end">
+                  <span className="text-3xl font-bold">{plan.price}</span>
+                  {plan.priceSuffix && (
+                    <span className="text-base font-normal text-gray-500 ml-1">
+                      {plan.priceSuffix}
+                    </span>
+                  )}
+                </div>
+                <ul className="mb-8 text-gray-600 space-y-2 flex-grow text-md">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start">
+                      <span className="text-blue-500 mr-2">
+                        <CheckIcon size={20} strokeWidth={3} className="inline-block" />
+                      </span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  size="lg"
+                  className={`w-full ${
+                    plan.highlight
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-50'
+                  }`}
+                >
+                  {plan.cta}
+                </Button>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
