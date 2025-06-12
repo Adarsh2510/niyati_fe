@@ -94,44 +94,46 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
         </div>
 
         <Conditional if={isToolbarVisible}>
-          <div className="w-[27%] bg-gray-100 p-4 flex flex-col border-l-2 border-gray-500">
-            <div className="flex-1">
-              <div className="mb-4">
-                <span className="p-2 text-md font-bold">Input</span>
-                <textarea
-                  rows={4}
-                  className="mt-4 w-full p-2 border-2 border-gray-300 dark:border-gray-800 rounded bg-gray-300"
-                  value={input}
-                  placeholder="Enter input here"
-                  onChange={e => setInput(e.target.value)}
-                />
-              </div>
-              <div className="mb-4 overflow-auto">
-                <span className="p-2 text-md font-bold">Output</span>
-                <pre className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap">
-                  {output ? output : 'Run code to see output'}
-                </pre>
-              </div>
+          <div className="w-[27%] bg-gray-100 p-4 grid grid-rows-[1fr_1fr_1fr_auto] gap-4 border-l-2 border-gray-500 h-full">
+            <div>
+              <span className="p-2 text-md font-bold">Input</span>
+              <textarea
+                rows={4}
+                className="mt-4 w-full p-2 border-2 border-gray-300 dark:border-gray-800 rounded bg-gray-300 overflow-auto"
+                value={input}
+                placeholder="Enter input here"
+                onChange={e => setInput(e.target.value)}
+              />
+            </div>
+            <div>
+              <span className="p-2 text-md font-bold">Output</span>
+              <pre className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap overflow-auto max-h-[140px]">
+                {output ? output : 'Run code to see output'}
+              </pre>
             </div>
 
-            <div className="mb-4 overflow-auto">
-              <span className="p-2 text-md font-bold">Examples</span>
-              {questionTestCases?.map((testCase, index) => (
-                <pre
-                  key={index}
-                  className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap"
-                >
-                  <span>{testCase}</span>
-                </pre>
-              ))}
+            <div>
+              <Conditional if={!!questionTestCases?.length}>
+                <span className="p-2 text-md font-bold">Examples</span>
+                {questionTestCases?.map((testCase, index) => (
+                  <pre
+                    key={index}
+                    className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap overflow-auto max-h-[140px]"
+                  >
+                    <span>{testCase}</span>
+                  </pre>
+                ))}
+              </Conditional>
             </div>
 
-            <div className="mt-auto pt-4 bg-gray-100">
+            <div className="pt-4 bg-gray-100">
               <div className="flex flex-row flex-wrap gap-2 justify-end items-center w-full">
-                <div className="flex-1">
+                <div className="flex-1 min-w-0 flex-shrink-0">
                   <Select value={language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="bg-white dark:bg-gray-800">
-                      <SelectValue>{language}</SelectValue>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 min-w-0">
+                      <SelectValue className="overflow-hidden text-ellipsis whitespace-nowrap">
+                        {language}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(EProgrammingLanguages).map(([key, value]) => (
@@ -146,7 +148,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
                 <Button
                   onClick={handleRunCode}
                   disabled={isLoading}
-                  className="bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-400 flex-shrink-0"
+                  className="bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-400 min-w-fit"
                 >
                   {isLoading ? (
                     <>

@@ -67,9 +67,9 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
     handleSubmitAnswer(response);
   };
 
-  if (isInterviewCompleted) {
-    redirect(`/dashboard/interview-room/${interview_id}/summary`);
-  }
+  // if (isInterviewCompleted) {
+  //   redirect(`/dashboard/interview-room/${interview_id}/summary`);
+  // }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
       <QuestionSection answerBoardPlaceholder={answerBoardPlaceholder} />
