@@ -51,16 +51,11 @@ const answerBoard = (props: TAnswerBoard) => {
   }
 };
 
-const QuestionSection = ({
-  solutionType,
-  answerBoardPlaceholder,
-}: {
-  solutionType: ESolutionType;
-  answerBoardPlaceholder: string;
-}) => {
+const QuestionSection = ({ answerBoardPlaceholder }: { answerBoardPlaceholder: string }) => {
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.current_question?.question_text;
   const questionTestCases = currentQuestion?.current_question?.question_test_cases;
+  const solutionType = currentQuestion?.solution_type || ESolutionType.TEXT_ANSWER;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
   const setCurrentWordIndex = useSetAtom(currentWordIndexAtom);
   const isSpeaking = useAtomValue(isSpeakingAtom);

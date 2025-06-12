@@ -2,6 +2,7 @@ import { useState, Suspense, lazy } from 'react';
 import { useAtom } from 'jotai';
 import { excalidrawRefAtom } from './atoms';
 import { ExcalidrawAPI } from './utils';
+import '@excalidraw/excalidraw/index.css';
 
 // Lazy load the Excalidraw component
 const Excalidraw = lazy(() =>

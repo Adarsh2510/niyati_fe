@@ -24,16 +24,16 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   const { interview_id } = params;
   const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
-  const [solutionType, setSolutionType] = useState<ESolutionType | undefined>(undefined);
   const excalidrawRef = useAtomValue(excalidrawRefAtom);
   const followUpQuestionId = useRef<string | null>(null);
   const answerBoardPlaceholder = useMemo(() => {
     const questionText = currentQuestion?.current_question?.question_text;
+    const currentSolutionType = currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER;
     return questionText
       ? `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
-          answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER]
-      : answerBoardPlaceholders[solutionType ?? ESolutionType.TEXT_ANSWER];
-  }, [currentQuestion, solutionType]);
+          answerBoardPlaceholders[currentSolutionType]
+      : answerBoardPlaceholders[currentSolutionType];
+  }, [currentQuestion]);
 
   const handleSubmitAnswer = (answer: TUserResponse) => {
     console.log('recieved answer', answer);
@@ -72,10 +72,7 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-      <QuestionSection
-        solutionType={solutionType ?? ESolutionType.TEXT_ANSWER}
-        answerBoardPlaceholder={answerBoardPlaceholder}
-      />
+      <QuestionSection answerBoardPlaceholder={answerBoardPlaceholder} />
       <InterviewControllers
         handleNextQuestion={() => {}}
         handleUserResponse={handleUserResponse}

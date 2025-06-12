@@ -181,7 +181,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
 
   if (!isBrowser) return <UnSupportedBrowser />;
   const isInterviewStarted = !!currentQuestion?.current_question?.question_text;
-  console.log('isAudioChunkSent', isAudioChunkSent);
+
   return (
     <>
       <div className={`flex gap-4 items-center justify-center h-16 ${className}`}>

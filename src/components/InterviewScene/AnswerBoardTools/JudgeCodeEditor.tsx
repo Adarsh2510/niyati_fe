@@ -106,7 +106,7 @@ const JudgeCodeEditor: React.FC<JudgeCodeEditorProps> = ({
                   onChange={e => setInput(e.target.value)}
                 />
               </div>
-              <div className="mb-4">
+              <div className="mb-4 overflow-auto">
                 <span className="p-2 text-md font-bold">Output</span>
                 <pre className="mt-4 p-4 bg-gray-300 dark:bg-gray-800 rounded whitespace-pre-wrap">
                   {output ? output : 'Run code to see output'}
