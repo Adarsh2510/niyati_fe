@@ -4,6 +4,7 @@ import {
   currentQuestionAtom,
   isSpeakingAtom,
   currentWordIndexAtom,
+  answerBoardPlaceholderAtom,
 } from './AnswerBoardTools/atoms';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { InterviewerAvatar } from '../Avatar';
@@ -51,7 +52,8 @@ const answerBoard = (props: TAnswerBoard) => {
   }
 };
 
-const QuestionSection = ({ answerBoardPlaceholder }: { answerBoardPlaceholder: string }) => {
+const QuestionSection = () => {
+  const answerBoardPlaceholder = useAtomValue(answerBoardPlaceholderAtom);
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.current_question?.question_text;
   const questionTestCases = currentQuestion?.current_question?.question_test_cases;

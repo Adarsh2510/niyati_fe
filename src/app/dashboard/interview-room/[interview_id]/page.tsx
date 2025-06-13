@@ -17,7 +17,6 @@ import {
   excalidrawRefAtom,
 } from '@/components/InterviewScene/AnswerBoardTools/atoms';
 import { useAtom, useAtomValue } from 'jotai';
-import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { generateWhiteboardImageUrl } from '@/components/InterviewScene/AnswerBoardTools/utils';
 
 export default function InterviewRoom({ params }: { params: { interview_id: string } }) {
@@ -26,14 +25,6 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
   const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
   const excalidrawRef = useAtomValue(excalidrawRefAtom);
   const followUpQuestionId = useRef<string | null>(null);
-  const answerBoardPlaceholder = useMemo(() => {
-    const questionText = currentQuestion?.current_question?.question_text;
-    const currentSolutionType = currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER;
-    return questionText
-      ? `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
-          answerBoardPlaceholders[currentSolutionType]
-      : answerBoardPlaceholders[currentSolutionType];
-  }, [currentQuestion]);
 
   const handleSubmitAnswer = (answer: TUserResponse) => {
     console.log('recieved answer', answer);
@@ -60,22 +51,22 @@ export default function InterviewRoom({ params }: { params: { interview_id: stri
     });
   };
 
-  const handleUserResponse = async (response: TUserResponse) => {
-    response.code_response = response.code_response?.replace(answerBoardPlaceholder, '');
-    response.image_response = await generateWhiteboardImageUrl(excalidrawRef);
-    console.log(response);
-    handleSubmitAnswer(response);
-  };
+  // const handleUserResponse = async (response: TUserResponse) => {
+  //   response.code_response = response.code_response?.replace(answerBoardPlaceholder, '');
+  //   response.image_response = await generateWhiteboardImageUrl(excalidrawRef);
+  //   console.log(response);
+  //   handleSubmitAnswer(response);
+  // };
 
   // if (isInterviewCompleted) {
   //   redirect(`/dashboard/interview-room/${interview_id}/summary`);
   // }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
-      <QuestionSection answerBoardPlaceholder={answerBoardPlaceholder} />
+      <QuestionSection />
       <InterviewControllers
         handleNextQuestion={() => {}}
-        handleUserResponse={handleUserResponse}
+        handleUserResponse={() => {}}
         className="p-2 bg-gray-100 border-t"
         interviewId={interview_id}
       />
