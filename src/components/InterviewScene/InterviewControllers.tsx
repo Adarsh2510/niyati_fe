@@ -84,6 +84,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         solution_type: solutionType,
         is_last_question: payload.is_last_question,
         is_interview_completed: payload.is_interview_completed,
+        _repeatId: Math.random(),
       });
       setIsAudioChunkSent(false);
 
@@ -223,12 +224,6 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
           />
         )}
       </div>
-      <Caption
-        key={interruptionState._repeatId}
-        text={interruptionState.message ?? ''}
-        isSpeaking={interruptionState.isSpeaking}
-        currentWordIndex={interruptionState.wordIndex}
-      />
     </>
   );
 };

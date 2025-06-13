@@ -7,7 +7,7 @@ const plans = [
     name: 'Basic',
     price: 'Free',
     features: [
-      'Free Pro access for first 1 month 🤑',
+      'Free Pro plan access for first 1 month 🤑 (Limited time offer)',
       '2 mock interviews per month',
       'Basic AI feedback',
       'Standard questions library',
