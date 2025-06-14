@@ -83,7 +83,7 @@ export function InterviewerAvatar({ ...props }) {
         nodes.Wolf3D_Head.morphTargetInfluences[mouthOpenIndex] = 0;
       }
     };
-  }, [isSpeaking, nodes.Wolf3D_Head, actions, animations]);
+  }, [isSpeaking, nodes.Wolf3D_Head, actions]);
 
   return (
     <group rotation-x={-Math.PI / 2}>

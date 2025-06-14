@@ -93,7 +93,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         message: `Received new question: ${payload.question.question_text}`,
       });
     },
-    [interviewId, router, setCurrentQuestion]
+    [interviewId, router, setCurrentQuestion, socket, setSocket, setIsAudioChunkSent]
   );
 
   const initializeSocket = useCallback(async () => {

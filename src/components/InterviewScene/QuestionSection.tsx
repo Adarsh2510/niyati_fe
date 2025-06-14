@@ -77,7 +77,7 @@ const QuestionSection = () => {
       answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, answerBoardPlaceholder, questionTestCases, currentQuestion?._repeatId]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases]);
 
   return (
     <>

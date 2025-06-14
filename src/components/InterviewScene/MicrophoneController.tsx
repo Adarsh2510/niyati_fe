@@ -67,7 +67,7 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
     } else {
       cleanupResources();
     }
-  }, [isBrowser, cleanupResources]);
+  }, [isBrowser, cleanupResources, setIsAudioChunkSent]);
 
   const startRecording = useCallback(async () => {
     if (!isBrowser) return;
@@ -125,7 +125,7 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
       toast.error('Error starting audio recording');
       cleanupResources();
     }
-  }, [isBrowser, socket, stopRecording, onRecordingChange, cleanupResources]);
+  }, [isBrowser, socket, stopRecording, onRecordingChange, cleanupResources, setIsAudioChunkSent]);
 
   const toggleRecording = useCallback(() => {
     if (!isBrowser) return;

@@ -90,7 +90,10 @@ export function SuggestedInterviews({ data, sectionTitle }: TInterviewSuggestion
                     </Conditional>
                     <Conditional if={!!interview?.descriptors}>
                       {Object.values(interview?.descriptors || {}).map(descriptor => (
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div
+                          key={descriptor.title}
+                          className="flex items-center text-sm text-gray-600"
+                        >
                           <descriptor.icon className="w-4 h-4 mr-1" />
                           {descriptor.title}
                         </div>

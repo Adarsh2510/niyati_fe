@@ -69,6 +69,7 @@ export function useSolutionSender(socket: InterviewRoomSocket | null) {
       excalidrawRef,
       setImageResponse,
       currentQuestion,
+      answerBoardPlaceholder,
     ]
   );
 }

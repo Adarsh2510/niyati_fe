@@ -29,7 +29,7 @@ const Caption: React.FC<CaptionProps> = ({ text, isSpeaking, currentWordIndex })
     if (highlightedWordRef.current?.offsetTop !== previousLineTopRef.current && allowAutoScroll) {
       scrollToHighlightedWord();
     }
-  }, [currentWordIndex, scrollToHighlightedWord]);
+  }, [currentWordIndex, scrollToHighlightedWord, allowAutoScroll]);
 
   useEffect(() => {
     const el = captionRef.current;
