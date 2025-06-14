@@ -1,6 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckIcon } from 'lucide-react';
+import Link from 'next/link';
 
 const plans = [
   {
@@ -27,7 +28,7 @@ const plans = [
       'Performance analytics',
       'Priority support',
     ],
-    cta: 'Get Started',
+    cta: 'Coming soon',
     highlight: 'Most Popular',
   },
   {
@@ -40,7 +41,7 @@ const plans = [
       'Dedicated support',
       'Custom integrations',
     ],
-    cta: 'Get Started',
+    cta: 'Coming soon',
     highlight: null,
   },
 ];
@@ -84,16 +85,18 @@ export default function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  size="lg"
-                  className={`w-full ${
-                    plan.highlight
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-50'
-                  }`}
-                >
-                  {plan.cta}
-                </Button>
+                <Link href="/dashboard" className="w-full">
+                  <Button
+                    size="lg"
+                    className={`w-full ${
+                      plan.highlight
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-50'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
               </Card>
             </div>
           ))}

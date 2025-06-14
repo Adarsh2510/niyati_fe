@@ -215,7 +215,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
             setIsAudioChunkSent(false);
           }}
         >
-          Provoke Interviewer
+          Submit Partial Response
         </Button>
         {socket && (
           <MicrophoneController

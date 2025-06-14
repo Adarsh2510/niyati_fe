@@ -49,6 +49,7 @@ export class InterviewRoomSocket {
   private config: ConnectionConfig;
   private callbacks: WebSocketCallbacks = {};
   private reconnectAttempts = 0;
+  private allowReconnect = true;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private audioThrottleInterval: NodeJS.Timeout | null = null;
@@ -143,7 +144,10 @@ export class InterviewRoomSocket {
     }
 
     this.callbacks.onDisconnect?.();
-    this.handleReconnect();
+
+    if (this.allowReconnect) {
+      this.handleReconnect();
+    }
   }
 
   private handleWebSocketError(error: Event): void {
@@ -391,16 +395,15 @@ export class InterviewRoomSocket {
       message: `Interview completed: ${JSON.stringify(payload)}`,
     });
 
-    // Close the WebSocket connection
+    this.allowReconnect = false;
+
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
 
-    // Clean up all resources
     this.cleanup();
 
-    // Notify the callback with completion status
     this.callbacks.onResponse?.({
       type: MessageType.INTERVIEW_CONTROL,
       command: CommandType.INTERVIEW_COMPLETED,
@@ -464,7 +467,6 @@ export class InterviewRoomSocket {
     if (!isBrowser) return;
     if (this.isRecording) return;
 
-    // Clean up any existing audio resources first
     this.cleanupAudioResources();
 
     navigator.mediaDevices
@@ -516,7 +518,6 @@ export class InterviewRoomSocket {
     this.isRecording = false;
     this.audioDuration = (Date.now() - (this.audioStartTime || 0)) / 1000;
 
-    // Convert audio chunks to base64 before cleaning up
     const base64Chunks = this.audioChunks.map(chunk => {
       const binary = Array.from(chunk)
         .map(byte => String.fromCharCode(byte))
@@ -541,7 +542,6 @@ export class InterviewRoomSocket {
       message: `Sent audio data: ${base64Chunks.length} chunks, duration: ${this.audioDuration}s`,
     });
 
-    // Ensure all audio tracks are stopped
     if (this.audioStream) {
       this.audioStream.getTracks().forEach(track => {
         track.stop();
@@ -549,7 +549,6 @@ export class InterviewRoomSocket {
       });
     }
 
-    // Clean up audio resources
     this.cleanupAudioResources();
   }
 
@@ -590,22 +589,18 @@ export class InterviewRoomSocket {
   }
 
   private getCurrentTextResponse(): string | undefined {
-    // Implement based on your state management
     return undefined;
   }
 
   private getCurrentCodeResponse(): string | undefined {
-    // Implement based on your state management
     return undefined;
   }
 
   private getCurrentImageResponse(): string | undefined {
-    // Implement based on your state management
     return undefined;
   }
 
   private getCurrentAudioResponse(): string | undefined {
-    // Implement based on your state management
     return undefined;
   }
 
@@ -632,6 +627,7 @@ export class InterviewRoomSocket {
   }
 
   public cleanup(): void {
+    this.allowReconnect = false;
     this.stopHeartbeat();
     this.stopAudioThrottle();
     if (this.reconnectTimeout) {
