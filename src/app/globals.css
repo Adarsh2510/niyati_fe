@@ -79,3 +79,15 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Dialog styling */
+dialog {
+  margin: auto;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}

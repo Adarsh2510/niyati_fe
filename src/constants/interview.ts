@@ -16,12 +16,21 @@ export enum ERole {
 export enum EDomain {
   SOFTWARE_ENGINEER = 'SOFTWARE_ENGINEER',
   DEVOPS_ENGINEER = 'DEVOPS_ENGINEER',
+  DATA_SCIENCE = 'DATA_SCIENCE',
+  PRODUCT_MANAGEMENT = 'PRODUCT_MANAGEMENT',
 }
 
 export enum EProgrammingLanguage {
   PYTHON = 'PYTHON',
   JAVA = 'JAVA',
   JS = 'JS',
+  TYPESCRIPT = 'TYPESCRIPT',
+  CPP = 'CPP',
+  CSHARP = 'CSHARP',
+  GO = 'GO',
+  RUST = 'RUST',
+  SWIFT = 'SWIFT',
+  KOTLIN = 'KOTLIN',
 }
 
 export enum ETargetCompany {
@@ -29,6 +38,14 @@ export enum ETargetCompany {
   MICROSOFT = 'MICROSOFT',
   FACEBOOK = 'FACEBOOK',
   AMAZON = 'AMAZON',
+  APPLE = 'APPLE',
+  NETFLIX = 'NETFLIX',
+  UBER = 'UBER',
+  AIRBNB = 'AIRBNB',
+  TWITTER = 'TWITTER',
+  LINKEDIN = 'LINKEDIN',
+  SALESFORCE = 'SALESFORCE',
+  ADOBE = 'ADOBE',
 }
 
 export enum EQuestionType {
@@ -46,6 +63,8 @@ export enum ESolutionType {
 export enum EInterviewRound {
   TECHNICAL_ROUND_1 = 'TECHNICAL_ROUND_1',
   TECHNICAL_ROUND_2 = 'TECHNICAL_ROUND_2',
+  SYSTEM_DESIGN = 'SYSTEM_DESIGN',
+  BEHAVIORAL = 'BEHAVIORAL',
   MANAGERIAL_ROUND = 'MANAGERIAL_ROUND',
   HR_ROUND = 'HR_ROUND',
 }

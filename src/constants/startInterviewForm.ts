@@ -48,6 +48,8 @@ export const FORM_FIELDS = {
     options: [
       { value: EDomain.SOFTWARE_ENGINEER, label: 'Software Engineer' },
       { value: EDomain.DEVOPS_ENGINEER, label: 'DevOps Engineer' },
+      { value: EDomain.DATA_SCIENCE, label: 'Data Science' },
+      { value: EDomain.PRODUCT_MANAGEMENT, label: 'Product Management' },
     ],
   },
   language: {
@@ -59,8 +61,15 @@ export const FORM_FIELDS = {
     }),
     options: [
       { value: EProgrammingLanguage.JS, label: 'JavaScript' },
+      { value: EProgrammingLanguage.TYPESCRIPT, label: 'TypeScript' },
       { value: EProgrammingLanguage.PYTHON, label: 'Python' },
       { value: EProgrammingLanguage.JAVA, label: 'Java' },
+      { value: EProgrammingLanguage.CPP, label: 'C++' },
+      { value: EProgrammingLanguage.CSHARP, label: 'C#' },
+      { value: EProgrammingLanguage.GO, label: 'Go' },
+      { value: EProgrammingLanguage.RUST, label: 'Rust' },
+      { value: EProgrammingLanguage.SWIFT, label: 'Swift' },
+      { value: EProgrammingLanguage.KOTLIN, label: 'Kotlin' },
     ],
   },
   targetCompany: {
@@ -73,7 +82,16 @@ export const FORM_FIELDS = {
     options: [
       { value: ETargetCompany.GOOGLE, label: 'Google' },
       { value: ETargetCompany.MICROSOFT, label: 'Microsoft' },
-      { value: ETargetCompany.FACEBOOK, label: 'Facebook' },
+      { value: ETargetCompany.FACEBOOK, label: 'Meta (Facebook)' },
+      { value: ETargetCompany.AMAZON, label: 'Amazon' },
+      { value: ETargetCompany.APPLE, label: 'Apple' },
+      { value: ETargetCompany.NETFLIX, label: 'Netflix' },
+      { value: ETargetCompany.UBER, label: 'Uber' },
+      { value: ETargetCompany.AIRBNB, label: 'Airbnb' },
+      { value: ETargetCompany.TWITTER, label: 'Twitter' },
+      { value: ETargetCompany.LINKEDIN, label: 'LinkedIn' },
+      { value: ETargetCompany.SALESFORCE, label: 'Salesforce' },
+      { value: ETargetCompany.ADOBE, label: 'Adobe' },
     ],
   },
   interviewRound: {
@@ -86,6 +104,8 @@ export const FORM_FIELDS = {
     options: [
       { value: EInterviewRound.TECHNICAL_ROUND_1, label: 'Technical Round 1' },
       { value: EInterviewRound.TECHNICAL_ROUND_2, label: 'Technical Round 2' },
+      { value: EInterviewRound.SYSTEM_DESIGN, label: 'System Design' },
+      { value: EInterviewRound.BEHAVIORAL, label: 'Behavioral' },
       { value: EInterviewRound.MANAGERIAL_ROUND, label: 'Managerial Round' },
       { value: EInterviewRound.HR_ROUND, label: 'HR Round' },
     ],

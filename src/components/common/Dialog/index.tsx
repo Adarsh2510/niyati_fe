@@ -13,17 +13,24 @@ type TDialogProps = {
 };
 
 export const Dialog = (props: TDialogProps) => {
-  const drawerRef = useRef<HTMLDialogElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const { heading, showDialog, onClose, children, footer } = props;
-  const { dialog, dialogContent, dialogHeader, dialogTitle, dialogFooter, closeButton } =
-    dialogStyles;
+  const {
+    dialog,
+    dialogContent,
+    dialogHeader,
+    dialogTitle,
+    dialogFooter,
+    closeButton,
+    dialogOverlay,
+  } = dialogStyles;
 
   useEffect(() => {
-    if (showDialog && drawerRef.current) {
-      drawerRef.current.showModal();
+    if (showDialog && dialogRef.current) {
+      dialogRef.current.showModal();
       document.body.style.overflow = 'hidden';
-    } else if (!showDialog && drawerRef.current) {
-      drawerRef.current.close();
+    } else if (!showDialog && dialogRef.current) {
+      dialogRef.current.close();
       document.body.style.overflow = 'unset';
     }
 
@@ -32,20 +39,41 @@ export const Dialog = (props: TDialogProps) => {
     };
   }, [showDialog]);
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const dialogDimensions = dialogRef.current?.getBoundingClientRect();
+    if (
+      dialogDimensions &&
+      (e.clientX < dialogDimensions.left ||
+        e.clientX > dialogDimensions.right ||
+        e.clientY < dialogDimensions.top ||
+        e.clientY > dialogDimensions.bottom)
+    ) {
+      onClose();
+    }
+  };
+
   return (
     <Conditional if={showDialog}>
-      <dialog ref={drawerRef} className={dialog} data-state={showDialog ? 'open' : 'closed'}>
-        <div className={dialogContent} id="dialog-content">
-          <div className={dialogHeader}>
-            <h2 className={dialogTitle}>{heading}</h2>
-            <Button variant="outline" onClick={onClose} className={closeButton}>
-              <X />
-            </Button>
+      <>
+        <div className={dialogOverlay} />
+        <dialog
+          ref={dialogRef}
+          className={dialog}
+          data-state={showDialog ? 'open' : 'closed'}
+          onClick={handleBackdropClick}
+        >
+          <div className={dialogContent} id="dialog-content">
+            <div className={dialogHeader}>
+              <h2 className={dialogTitle}>{heading}</h2>
+              <Button variant="outline" onClick={onClose} className={closeButton}>
+                <X />
+              </Button>
+            </div>
+            <div className="py-4">{children}</div>
+            {footer && <div className={dialogFooter}>{footer}</div>}
           </div>
-          <div className={dialogStyles.dialogContent}>{children}</div>
-          {footer && <div className={dialogFooter}>{footer}</div>}
-        </div>
-      </dialog>
+        </dialog>
+      </>
     </Conditional>
   );
 };

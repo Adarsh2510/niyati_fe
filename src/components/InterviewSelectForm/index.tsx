@@ -42,6 +42,11 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       domain: EDomain.SOFTWARE_ENGINEER,
+      role: props.role || '',
+      experience: props.experience || '',
+      language: props.language || '',
+      targetCompany: props.targetCompany || '',
+      interviewRound: props.interviewRound || '',
     },
   });
 
@@ -87,14 +92,15 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
             render={({ field: formField }) => (
               <FormItem>
                 <FormLabel>{field.label}</FormLabel>
-                <Select onValueChange={formField.onChange} defaultValue={formField.value}>
+                <Select
+                  onValueChange={formField.onChange}
+                  defaultValue={
+                    formField.value || props[key as keyof TInterviewSelectFormProps] || ''
+                  }
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          props[key as keyof TInterviewSelectFormProps] || field.placeholder
-                        }
-                      />
+                      <SelectValue placeholder={field.placeholder} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

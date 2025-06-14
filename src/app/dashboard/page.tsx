@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import DashboardHeader from '@/components/common/DashboardHeader';
 import { StartInterviewCard } from '@/components/dashboard/StartInterviewCard';
 import { PerformanceCard } from '@/components/dashboard/PerformanceCard';
 import { PastInterviewsCard } from '@/components/dashboard/PastInterviewsCard';
@@ -8,87 +7,135 @@ import {
   SuggestedInterviews,
   TInterviewSuggestionCard,
 } from '@/components/InterviewSummary/SuggestedInterviews';
-import { BarChart, ChartArea, Clock, Layout, TreePine } from 'lucide-react';
-import { Code } from 'lucide-react';
 import { getPastInterviews } from '@/lib/api/getInterviewData';
 import { GetPastInterviewsResponse } from '@/lib/api/types';
+import {
+  EDomain,
+  EExperience,
+  EInterviewRound,
+  EProgrammingLanguage,
+  ERole,
+  ETargetCompany,
+} from '@/constants/interview';
 
 const companySpecificInterviews: TInterviewSuggestionCard[] = [
   {
-    title: 'TechCorp',
-    subTitle: 'Full Stack',
-    textLogo: 'TC',
-    difficulty: 'Medium',
+    title: 'Google System Design',
+    subTitle: 'Senior Software Engineer',
+    textLogo: 'G',
+    difficulty: 'Advanced',
     link: '/',
+    role: ERole.FULLSTACK,
+    targetCompany: ETargetCompany.GOOGLE,
+    interviewRound: EInterviewRound.SYSTEM_DESIGN,
+    experience: EExperience.SENIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.JAVA,
   },
   {
-    title: 'Innovative Solutions',
+    title: 'Meta Frontend',
     subTitle: 'Frontend Developer',
-    textLogo: 'IS',
+    textLogo: 'M',
     difficulty: 'Medium',
     link: '/',
+    role: ERole.FRONTEND,
+    targetCompany: ETargetCompany.FACEBOOK,
+    interviewRound: EInterviewRound.TECHNICAL_ROUND_1,
+    experience: EExperience.JUNIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.JS,
   },
   {
-    title: 'Creative Minds',
+    title: 'Amazon Behavioral',
     subTitle: 'Backend Developer',
-    textLogo: 'CM',
+    textLogo: 'A',
     difficulty: 'Medium',
     link: '/',
+    role: ERole.BACKEND,
+    targetCompany: ETargetCompany.AMAZON,
+    interviewRound: EInterviewRound.BEHAVIORAL,
+    experience: EExperience.SENIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.JAVA,
   },
 ];
 
 const suggestedInterviewsData: TInterviewSuggestionCard[] = [
   {
     title: 'Frontend Developer Interview',
-    subTitle: 'Tech Corp',
+    subTitle: 'Netflix',
     difficulty: 'Intermediate',
     descriptors: [
       {
         title: '60 mins',
-        icon: Clock,
+        iconName: 'Clock',
       },
     ],
-    icon: BarChart,
+    iconName: 'BarChart',
     link: '/',
+    role: ERole.FRONTEND,
+    targetCompany: ETargetCompany.NETFLIX,
+    interviewRound: EInterviewRound.TECHNICAL_ROUND_1,
+    language: EProgrammingLanguage.TYPESCRIPT,
+    experience: EExperience.JUNIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
   },
   {
     title: 'System Design Interview',
-    subTitle: 'StartUp Inc',
+    subTitle: 'Microsoft',
     difficulty: 'Advanced',
     descriptors: [
       {
         title: '45 mins',
-        icon: Clock,
+        iconName: 'Clock',
       },
     ],
-    icon: Layout,
+    iconName: 'Layout',
     link: '/',
+    role: ERole.FULLSTACK,
+    targetCompany: ETargetCompany.MICROSOFT,
+    interviewRound: EInterviewRound.SYSTEM_DESIGN,
+    language: EProgrammingLanguage.CSHARP,
+    experience: EExperience.SENIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
   },
   {
-    title: 'Data Structures & Algorithms',
-    subTitle: 'Tech Giants',
+    title: 'Technical Round 1 Apple',
+    subTitle: 'Apple',
     difficulty: 'Advanced',
     descriptors: [
       {
         title: '90 mins',
-        icon: Clock,
+        iconName: 'Clock',
       },
     ],
-    icon: TreePine,
+    iconName: 'TreePine',
     link: '/',
+    role: ERole.FULLSTACK,
+    targetCompany: ETargetCompany.APPLE,
+    interviewRound: EInterviewRound.TECHNICAL_ROUND_1,
+    language: EProgrammingLanguage.JS,
+    experience: EExperience.LEAD,
+    domain: EDomain.SOFTWARE_ENGINEER,
   },
   {
-    title: 'Data Structures & Algorithms',
-    subTitle: 'Tech Giants',
-    difficulty: 'Advanced',
+    title: 'Behavioral Interview',
+    subTitle: 'Amazon',
+    difficulty: 'Medium',
     descriptors: [
       {
-        title: '90 mins',
-        icon: Clock,
+        title: '60 mins',
+        iconName: 'Clock',
       },
     ],
-    icon: TreePine,
+    iconName: 'TreePine',
     link: '/',
+    role: ERole.BACKEND,
+    targetCompany: ETargetCompany.AMAZON,
+    interviewRound: EInterviewRound.BEHAVIORAL,
+    language: EProgrammingLanguage.JAVA,
+    experience: EExperience.SENIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
   },
 ];
 
@@ -99,19 +146,24 @@ const roleInterviewData: TInterviewSuggestionCard[] = [
     descriptors: [
       {
         title: '25 questions',
-        icon: Code,
+        iconName: 'Code',
       },
       {
         title: '2 hours',
-        icon: Clock,
+        iconName: 'Clock',
       },
       {
         title: 'Medium',
-        icon: ChartArea,
+        iconName: 'ChartArea',
       },
     ],
-    icon: Code,
+    iconName: 'Code',
     link: '/',
+    role: ERole.FRONTEND,
+    experience: EExperience.JUNIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.TYPESCRIPT,
+    targetCompany: ETargetCompany.GOOGLE,
   },
   {
     title: 'Backend Developer',
@@ -119,19 +171,24 @@ const roleInterviewData: TInterviewSuggestionCard[] = [
     descriptors: [
       {
         title: '30 questions',
-        icon: Code,
+        iconName: 'Code',
       },
       {
         title: '2.5 hours',
-        icon: Clock,
+        iconName: 'Clock',
       },
       {
         title: 'Medium',
-        icon: ChartArea,
+        iconName: 'ChartArea',
       },
     ],
-    icon: Code,
+    iconName: 'Code',
     link: '/',
+    role: ERole.BACKEND,
+    experience: EExperience.JUNIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.PYTHON,
+    targetCompany: ETargetCompany.MICROSOFT,
   },
   {
     title: 'Full Stack Developer',
@@ -139,19 +196,24 @@ const roleInterviewData: TInterviewSuggestionCard[] = [
     descriptors: [
       {
         title: '40 questions',
-        icon: Code,
+        iconName: 'Code',
       },
       {
         title: '3 hours',
-        icon: Clock,
+        iconName: 'Clock',
       },
       {
-        title: 'Medium',
-        icon: ChartArea,
+        title: 'Advanced',
+        iconName: 'ChartArea',
       },
     ],
-    icon: Code,
+    iconName: 'Code',
     link: '/',
+    role: ERole.FULLSTACK,
+    experience: EExperience.SENIOR,
+    domain: EDomain.SOFTWARE_ENGINEER,
+    language: EProgrammingLanguage.PYTHON,
+    targetCompany: ETargetCompany.FACEBOOK,
   },
 ];
 
