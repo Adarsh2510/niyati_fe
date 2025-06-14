@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { trustedBy } from '@/constants/landingData';
+import { FE_ASSETS } from '@/constants/imageAssets';
 import Link from 'next/link';
 
 export default function HeroSection() {
@@ -33,7 +34,7 @@ export default function HeroSection() {
         <div className="flex-1 flex justify-center py-8">
           <div className="rounded-xl overflow-hidden shadow-lg bg-white">
             <Image
-              src="/landingPageBannerImage.jpg"
+              src={FE_ASSETS.LANDING_PAGE.BANNER_IMAGE}
               alt="Interview practice"
               width={400}
               height={320}

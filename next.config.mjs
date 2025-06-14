@@ -6,6 +6,14 @@ const nextConfig = {
     config.plugins.push(new MiniCssExtractPlugin());
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
