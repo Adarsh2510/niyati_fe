@@ -11,6 +11,7 @@ import {
 import { BarChart, ChartArea, Clock, Layout, TreePine } from 'lucide-react';
 import { Code } from 'lucide-react';
 import { getPastInterviews } from '@/lib/api/getInterviewData';
+import { GetPastInterviewsResponse } from '@/lib/api/types';
 
 const companySpecificInterviews: TInterviewSuggestionCard[] = [
   {
@@ -155,7 +156,13 @@ const roleInterviewData: TInterviewSuggestionCard[] = [
 ];
 
 export default async function DashboardPage() {
-  const pastInterviewsData = await getPastInterviews();
+  let pastInterviewsData: GetPastInterviewsResponse = { interviews: [] };
+
+  try {
+    pastInterviewsData = await getPastInterviews();
+  } catch (error) {
+    console.error('Failed to fetch past interviews:', error);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

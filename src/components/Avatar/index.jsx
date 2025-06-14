@@ -5,7 +5,7 @@ Command: npx gltfjsx@6.5.3 public/models/interviewer_avatar.glb -o src/component
 import React, { useEffect, useRef } from 'react';
 import { useGraph } from '@react-three/fiber';
 import { useAnimations, useFBX, useGLTF } from '@react-three/drei';
-import { SkeletonUtils } from 'three-stdlib';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
 import { animations } from '@/constants/interviewer';
 import { useAtomValue } from 'jotai';
 import { isSpeakingAtom } from '../InterviewScene/AnswerBoardTools/atoms';

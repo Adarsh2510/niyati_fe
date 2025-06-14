@@ -6,6 +6,9 @@ import { createExcalidrawRef } from './utils';
 import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { ESolutionType } from '@/constants/interview';
 
+// Check if we're running in a browser environment
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
 export const isSpeakingAtom = atom(false);
 export const isRecordingAtom = atom(false);
 export const userTextResponseAtom = atom('');
@@ -25,7 +28,7 @@ export const answerBoardPlaceholderAtom = atom<string>(get => {
     : answerBoardPlaceholders[solutionType];
 });
 export const currentWordIndexAtom = atom(-1);
-export const excalidrawRefAtom = atom(createExcalidrawRef());
+export const excalidrawRefAtom = atom(isBrowser ? createExcalidrawRef() : { current: null });
 export const isAudioChunkSentAtom = atom(false);
 
 // Unified interruption state

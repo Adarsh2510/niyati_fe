@@ -5,6 +5,9 @@ import { uploadImage } from '@/lib/services/cloudinary';
 import { sendLog } from '@/utils/logs';
 import { ELogLevels } from '@/constants/logs';
 
+// Check if we're running in a browser environment
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
 // This interface matches the minimum API surface we need from Excalidraw
 export interface ExcalidrawAPI {
   getSceneElements: () => any[];
@@ -23,6 +26,8 @@ export const createExcalidrawRef = () => {
 };
 
 export const optimizeImage = async (dataUrl: string): Promise<string> => {
+  if (!isBrowser) return dataUrl;
+
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -73,7 +78,7 @@ export const optimizeImage = async (dataUrl: string): Promise<string> => {
 export const generateWhiteboardImageUrl = async (
   excalidrawRef: MutableRefObject<ExcalidrawAPI | null>
 ): Promise<string | undefined> => {
-  if (!excalidrawRef) return undefined;
+  if (!isBrowser || !excalidrawRef) return undefined;
 
   try {
     // Access the excalidrawRef.current object instead of using excalidrawRef directly

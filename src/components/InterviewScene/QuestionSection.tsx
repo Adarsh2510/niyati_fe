@@ -1,3 +1,5 @@
+'use client';
+
 import { speakText } from './speechController';
 import { useEffect, useState, useMemo } from 'react';
 import {
@@ -11,17 +13,16 @@ import { InterviewerAvatar } from '../Avatar';
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { ESolutionType } from '@/constants/interview';
-import WhiteboardCanvas from './AnswerBoardTools/WhiteboardCanvas';
-import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { toast } from 'sonner';
 import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
 import Caption from './Caption';
+import dynamic from 'next/dynamic';
+
+const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanvas'), {
+  ssr: false,
+});
 
 function InterviewerAvatarCanvas() {
-  // const backgroundImage = useTexture('/meeting-room.webp');
-  // const viewPort = useThree((state: any) => state.viewport);
-  // const [animation, setAnimation] = useState(animations.SittingIdle);
-
   return (
     <>
       <Environment preset="sunset" />
@@ -53,6 +54,7 @@ const answerBoard = (props: TAnswerBoard) => {
 };
 
 const QuestionSection = () => {
+  const [isMounted, setIsMounted] = useState(false);
   const answerBoardPlaceholder = useAtomValue(answerBoardPlaceholderAtom);
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.current_question?.question_text;
@@ -64,20 +66,32 @@ const QuestionSection = () => {
   const currentWordIndex = useAtomValue(currentWordIndexAtom);
 
   useEffect(() => {
-    speakText({
-      text: questionText ?? '',
-      setIsSpeaking,
-      setCurrentWordIndex,
-    });
-  }, [questionText, currentQuestion?._repeatId, setIsSpeaking, setCurrentWordIndex]);
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && questionText) {
+      speakText({
+        text: questionText,
+        setIsSpeaking,
+        setCurrentWordIndex,
+      });
+    }
+  }, [questionText, currentQuestion?._repeatId, setIsSpeaking, setCurrentWordIndex, isMounted]);
 
   const answerBoardComponent = useMemo(() => {
+    if (!isMounted) return null;
+
     return answerBoard({
       solutionType,
       answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, answerBoardPlaceholder, questionTestCases]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases, isMounted]);
+
+  if (!isMounted) {
+    return <div className="h-[85vh] flex items-center justify-center">Loading question...</div>;
+  }
 
   return (
     <>

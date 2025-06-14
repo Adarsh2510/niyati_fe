@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState, useCallback } from 'react';
 import UnSupportedBrowser from './UnSupportedBrowser';
 import { TUserResponse } from '@/lib/api/types';
@@ -93,7 +95,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         message: `Received new question: ${payload.question.question_text}`,
       });
     },
-    [interviewId, router, setCurrentQuestion, socket, setSocket, setIsAudioChunkSent]
+    [interviewId, router, setCurrentQuestion, setIsAudioChunkSent, socket, setSocket]
   );
 
   const initializeSocket = useCallback(async () => {

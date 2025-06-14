@@ -1,66 +1,34 @@
 'use client';
 import 'regenerator-runtime/runtime';
 
-import { IGetNextQuestionResponse } from '@/lib/api/types';
-import { useState, useRef, useMemo } from 'react';
-import { QuestionType } from '@/constants/questions';
-import { ESolutionType } from '@/constants/interview';
-import QuestionSection from '@/components/InterviewScene/QuestionSection';
-import InterviewControllers from '@/components/InterviewScene/InterviewControllers';
-import { submitAnswer } from '@/lib/api/getInterviewData';
-import { TUserResponse } from '@/lib/api/types';
+import { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
-import DashboardHeader from '@/components/common/DashboardHeader';
 import Footer from '@/components/common/Footer';
-import {
-  currentQuestionAtom,
-  excalidrawRefAtom,
-} from '@/components/InterviewScene/AnswerBoardTools/atoms';
-import { useAtom, useAtomValue } from 'jotai';
-import { generateWhiteboardImageUrl } from '@/components/InterviewScene/AnswerBoardTools/utils';
+import dynamic from 'next/dynamic';
+
+const QuestionSection = dynamic(() => import('@/components/InterviewScene/QuestionSection'), {
+  ssr: false,
+});
+
+const InterviewControllers = dynamic(
+  () => import('@/components/InterviewScene/InterviewControllers'),
+  { ssr: false }
+);
 
 export default function InterviewRoom({ params }: { params: { interview_id: string } }) {
   const { interview_id } = params;
-  const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
-  const [isInterviewCompleted, setIsInterviewCompleted] = useState(false);
-  const excalidrawRef = useAtomValue(excalidrawRefAtom);
-  const followUpQuestionId = useRef<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleSubmitAnswer = (answer: TUserResponse) => {
-    console.log('recieved answer', answer);
-    submitAnswer({
-      user_id: 'test-user-id',
-      interview_id: interview_id,
-      question_type: currentQuestion?.question_type ?? QuestionType.INITIAL,
-      user_response: answer,
-      follow_up_question_id: followUpQuestionId.current ?? undefined,
-    }).then(data => {
-      console.log('recieved data', data);
-      if (data.follow_up_question) {
-        followUpQuestionId.current = Object.keys(data.follow_up_question)[0] ?? null;
-        setCurrentQuestion({
-          question_type: QuestionType.FOLLOW_UP,
-          current_question: Object.values(data.follow_up_question)[0],
-          is_last_question: false,
-          is_interview_completed: false,
-          solution_type: currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER,
-        });
-      } else {
-        followUpQuestionId.current = null;
-      }
-    });
-  };
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // const handleUserResponse = async (response: TUserResponse) => {
-  //   response.code_response = response.code_response?.replace(answerBoardPlaceholder, '');
-  //   response.image_response = await generateWhiteboardImageUrl(excalidrawRef);
-  //   console.log(response);
-  //   handleSubmitAnswer(response);
-  // };
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">Loading interview room...</div>
+    );
+  }
 
-  // if (isInterviewCompleted) {
-  //   redirect(`/dashboard/interview-room/${interview_id}/summary`);
-  // }
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr_auto_auto]">
       <QuestionSection />
