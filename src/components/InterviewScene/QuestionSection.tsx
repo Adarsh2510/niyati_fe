@@ -18,6 +18,7 @@ import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
 import Caption from './Caption';
 import dynamic from 'next/dynamic';
 import QuestionSectionSkeleton from './QuestionSectionSkeleton';
+import { FE_ASSETS } from '@/constants/imageAssets';
 
 const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanvas'), {
   ssr: false,
@@ -69,19 +70,15 @@ const QuestionSection = () => {
   const isSpeaking = useAtomValue(isSpeakingAtom);
   const currentWordIndex = useAtomValue(currentWordIndexAtom);
 
-  // Handle initial mounting
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Handle asset loading
   useEffect(() => {
     if (!isMounted) return;
 
-    // Minimum loading time to prevent flash
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Simulate asset loading (replace with actual asset loading check if needed)
     Promise.all([minLoadingTime]).then(() => {
       setIsAssetsLoaded(true);
       setIsLoading(false);
@@ -123,7 +120,11 @@ const QuestionSection = () => {
     <>
       <div
         className="h-[85vh] grid grid-cols-[1fr_3fr] grid-rows-[1fr_1fr]"
-        style={{ backgroundImage: `url('/meeting-room.webp')` }}
+        style={{
+          backgroundImage: `url(${FE_ASSETS.DASHBOARD.INTERVIEW_ROOM_BACKGROUND_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
         <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{}</div>
         <div className="col-start-1 col-end-2 row-start-2 row-end-3">
