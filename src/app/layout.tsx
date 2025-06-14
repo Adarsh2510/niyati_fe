@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/components/AuthProvider';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 import ClarityAnalytics from '@/components/analytics/ClarityAnalytics';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,6 +26,7 @@ export default function RootLayout({
           <Toaster />
         </AuthProvider>
         <ClarityAnalytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
