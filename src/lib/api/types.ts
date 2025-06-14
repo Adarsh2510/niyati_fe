@@ -29,7 +29,7 @@ export interface IGetCurrentQuestionResponse
 }
 
 export type TUserResponse = {
-  audio_response: string; // audio response which is now converted to text
+  audio_response?: string; // audio response which is now converted to text
   text_response?: string; // text response - from code/text editor
   image_response?: string; // image response from whiteboard - base64 data of image
   code_response?: string; // code response - from code editor
@@ -76,3 +76,12 @@ export type TGetInterviewSummaryResponse = {
 export type TInterviewRoomResponse = {
   interview_id: string;
 };
+
+export interface GetPastInterviewsResponse {
+  interviews: Array<{
+    interview_id: string;
+    name: string;
+    date: string;
+    score: number;
+  }>;
+}

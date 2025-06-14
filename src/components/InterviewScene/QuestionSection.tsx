@@ -1,31 +1,35 @@
-import { speakQuestion } from './speechController';
-import { useEffect, useState, useMemo } from 'react';
+'use client';
+
+import { speakText } from './speechController';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import {
   currentQuestionAtom,
   isSpeakingAtom,
   currentWordIndexAtom,
+  answerBoardPlaceholderAtom,
 } from './AnswerBoardTools/atoms';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { InterviewerAvatar } from '../Avatar';
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { ESolutionType } from '@/constants/interview';
-import WhiteboardCanvas from './AnswerBoardTools/WhiteboardCanvas';
-import { answerBoardPlaceholders } from '@/constants/interviewSceneLabels';
 import { toast } from 'sonner';
 import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
-import QuestionCaption from './QuestionCaption';
+import Caption from './Caption';
+import dynamic from 'next/dynamic';
+import QuestionSectionSkeleton from './QuestionSectionSkeleton';
+import { FE_ASSETS } from '@/constants/imageAssets';
+
+const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanvas'), {
+  ssr: false,
+});
 
 function InterviewerAvatarCanvas() {
-  // const backgroundImage = useTexture('/meeting-room.webp');
-  // const viewPort = useThree((state: any) => state.viewport);
-  // const [animation, setAnimation] = useState(animations.SittingIdle);
-
   return (
-    <>
+    <Suspense fallback={null}>
       <Environment preset="sunset" />
       <InterviewerAvatar position={[0, -3, -2]} scale={2} />
-    </>
+    </Suspense>
   );
 }
 
@@ -34,6 +38,7 @@ type TAnswerBoard = {
   answerBoardPlaceholder?: string;
   questionTestCases?: string[];
 };
+
 const answerBoard = (props: TAnswerBoard) => {
   switch (props.solutionType) {
     case ESolutionType.WHITEBOARD_IMAGE:
@@ -51,40 +56,75 @@ const answerBoard = (props: TAnswerBoard) => {
   }
 };
 
-const QuestionSection = ({
-  solutionType,
-  answerBoardPlaceholder,
-}: {
-  solutionType: ESolutionType;
-  answerBoardPlaceholder: string;
-}) => {
+const QuestionSection = () => {
+  const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
+  const answerBoardPlaceholder = useAtomValue(answerBoardPlaceholderAtom);
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.current_question?.question_text;
   const questionTestCases = currentQuestion?.current_question?.question_test_cases;
+  const solutionType = currentQuestion?.solution_type || ESolutionType.TEXT_ANSWER;
   const setIsSpeaking = useSetAtom(isSpeakingAtom);
   const setCurrentWordIndex = useSetAtom(currentWordIndexAtom);
+  const isSpeaking = useAtomValue(isSpeakingAtom);
+  const currentWordIndex = useAtomValue(currentWordIndexAtom);
 
   useEffect(() => {
-    speakQuestion({
-      questionText: questionText ?? '',
-      setIsSpeaking,
-      setCurrentWordIndex,
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+
+    Promise.all([minLoadingTime]).then(() => {
+      setIsAssetsLoaded(true);
+      setIsLoading(false);
     });
-  }, [questionText, currentQuestion?._repeatId, setIsSpeaking, setCurrentWordIndex]);
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (isMounted && questionText && !isLoading) {
+      speakText({
+        text: questionText,
+        setIsSpeaking,
+        setCurrentWordIndex,
+      });
+    }
+  }, [
+    questionText,
+    currentQuestion?._repeatId,
+    setIsSpeaking,
+    setCurrentWordIndex,
+    isMounted,
+    isLoading,
+  ]);
 
   const answerBoardComponent = useMemo(() => {
+    if (!isMounted || isLoading) return null;
+
     return answerBoard({
       solutionType,
       answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, answerBoardPlaceholder, questionTestCases, currentQuestion?._repeatId]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases, isMounted, isLoading]);
+
+  if (!isMounted || isLoading || !isAssetsLoaded) {
+    return <QuestionSectionSkeleton />;
+  }
 
   return (
     <>
       <div
         className="h-[85vh] grid grid-cols-[1fr_3fr] grid-rows-[1fr_1fr]"
-        style={{ backgroundImage: `url('/meeting-room.webp')` }}
+        style={{
+          backgroundImage: `url(${FE_ASSETS.DASHBOARD.INTERVIEW_ROOM_BACKGROUND_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
         <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{}</div>
         <div className="col-start-1 col-end-2 row-start-2 row-end-3">
@@ -96,7 +136,12 @@ const QuestionSection = ({
           {answerBoardComponent}
         </div>
       </div>
-      <QuestionCaption />
+      <Caption
+        key={currentQuestion?._repeatId}
+        text={questionText ?? ''}
+        isSpeaking={isSpeaking}
+        currentWordIndex={currentWordIndex}
+      />
     </>
   );
 };

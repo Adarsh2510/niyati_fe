@@ -5,18 +5,19 @@ Command: npx gltfjsx@6.5.3 public/models/interviewer_avatar.glb -o src/component
 import React, { useEffect, useRef } from 'react';
 import { useGraph } from '@react-three/fiber';
 import { useAnimations, useFBX, useGLTF } from '@react-three/drei';
-import { SkeletonUtils } from 'three-stdlib';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
 import { animations } from '@/constants/interviewer';
 import { useAtomValue } from 'jotai';
 import { isSpeakingAtom } from '../InterviewScene/AnswerBoardTools/atoms';
+import { FE_ASSETS } from '@/constants/imageAssets';
 
 export function InterviewerAvatar({ ...props }) {
-  const { scene } = useGLTF('/models/interviewer_avatar.glb');
+  const { scene } = useGLTF(FE_ASSETS.MISC.INTERVIEWER_AVATAR);
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(clone);
-  const { animations: meetingAnimations } = useFBX('/animations/meeting.fbx');
-  const { animations: sittingIdleAnimations } = useFBX('/animations/sitting_idle.fbx');
-  const { animations: talkingAnimations } = useFBX('/animations/talking.fbx');
+  const { animations: meetingAnimations } = useFBX(FE_ASSETS.MISC.MEETING_ANIMATION);
+  const { animations: sittingIdleAnimations } = useFBX(FE_ASSETS.MISC.SITTING_IDLE_ANIMATION);
+  const { animations: talkingAnimations } = useFBX(FE_ASSETS.MISC.TALKING_ANIMATION);
 
   // Clone the animations to avoid mutating the original
   const processedAnimations = React.useMemo(() => {
@@ -83,7 +84,7 @@ export function InterviewerAvatar({ ...props }) {
         nodes.Wolf3D_Head.morphTargetInfluences[mouthOpenIndex] = 0;
       }
     };
-  }, [isSpeaking, nodes.Wolf3D_Head, actions, animations]);
+  }, [isSpeaking, nodes.Wolf3D_Head, actions]);
 
   return (
     <group rotation-x={-Math.PI / 2}>
@@ -151,4 +152,4 @@ export function InterviewerAvatar({ ...props }) {
   );
 }
 
-useGLTF.preload('/models/interviewer_avatar.glb');
+useGLTF.preload(FE_ASSETS.MISC.INTERVIEWER_AVATAR);

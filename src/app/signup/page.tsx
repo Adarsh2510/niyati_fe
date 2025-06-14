@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { RegisterRequest } from '@/types/auth';
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const { status } = useSession();
   const searchParams = useSearchParams();
@@ -169,5 +169,15 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}
+    >
+      <SignupContent />
+    </Suspense>
   );
 }

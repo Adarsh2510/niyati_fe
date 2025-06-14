@@ -67,9 +67,7 @@ export default async function InterviewSummary({ params }: { params: { interview
   const { interview_id } = params;
 
   const interviewSummary = await getInterviewSummary({ interview_id, user_id: 'test_user_id' });
-  console.log('interviewSummary', interviewSummary);
-  const { overall_feedback, total_score, section_wise_total_score, question_wise_feedback } =
-    interviewSummary;
+  const { overall_feedback, total_score, question_wise_feedback } = interviewSummary;
   const { strong_points, weak_points } = overall_feedback;
 
   return (

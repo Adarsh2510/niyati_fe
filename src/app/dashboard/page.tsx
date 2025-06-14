@@ -10,6 +10,8 @@ import {
 } from '@/components/InterviewSummary/SuggestedInterviews';
 import { BarChart, ChartArea, Clock, Layout, TreePine } from 'lucide-react';
 import { Code } from 'lucide-react';
+import { getPastInterviews } from '@/lib/api/getInterviewData';
+import { GetPastInterviewsResponse } from '@/lib/api/types';
 
 const companySpecificInterviews: TInterviewSuggestionCard[] = [
   {
@@ -154,16 +156,24 @@ const roleInterviewData: TInterviewSuggestionCard[] = [
 ];
 
 export default async function DashboardPage() {
+  let pastInterviewsData: GetPastInterviewsResponse = { interviews: [] };
+
+  try {
+    pastInterviewsData = await getPastInterviews();
+  } catch (error) {
+    console.error('Failed to fetch past interviews:', error);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StartInterviewCard />
           <Suspense fallback={<div>Loading...</div>}>
-            <PerformanceCard />
+            <PerformanceCard interviews={pastInterviewsData.interviews} />
           </Suspense>
           <Suspense fallback={<div>Loading...</div>}>
-            <PastInterviewsCard />
+            <PastInterviewsCard interviews={pastInterviewsData.interviews} />
           </Suspense>
         </div>
 

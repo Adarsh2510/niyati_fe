@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { LoginRequest } from '@/types/auth';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const { status } = useSession();
   const searchParams = useSearchParams();
@@ -42,18 +42,15 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email: loginData.email,
         password: loginData.password,
-        redirect: false,
         callbackUrl,
       });
 
       if (result?.error) {
         toast.error('Invalid credentials');
-        setIsLoading(false);
-        return;
+      } else {
+        toast.error('An unknown error occurred during login.');
       }
-
-      toast.success('Logged in successfully');
-      // The useEffect hook will handle redirection once the session is established
+      setIsLoading(false);
     } catch (error) {
       console.error('Login error:', error);
       toast.error('An error occurred during login');
@@ -110,7 +107,7 @@ export default function LoginPage() {
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
@@ -118,5 +115,15 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

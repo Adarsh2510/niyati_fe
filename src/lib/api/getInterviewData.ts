@@ -9,6 +9,7 @@ import {
   TGetInterviewSummaryResponse,
   TGetInterviewSummaryRequest,
   IGetCurrentQuestionResponse,
+  GetPastInterviewsResponse,
 } from './types';
 import { sendLog } from '@/utils/logs';
 import { ELogLevels } from '@/constants/logs';
@@ -19,7 +20,7 @@ import { authOptions } from '@/lib/auth';
 const fetchApiData = async <T>(
   url: string,
   method: string,
-  body: any
+  body?: any
 ): Promise<IApiResponse<T>> => {
   try {
     // Try server-side session first, then fall back to client-side session
@@ -30,14 +31,21 @@ const fetchApiData = async <T>(
       // If getServerSession fails (client component), fall back to getSession
       session = await getSession();
     }
-    const response = await fetch(url, {
+
+    const requestOptions: RequestInit = {
       method: method || 'POST',
-      body: JSON.stringify(body),
       headers: {
         'Content-Type': 'application/json',
         ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
       },
-    });
+    };
+
+    // Only add body for non-GET requests
+    if (method !== 'GET' && body) {
+      requestOptions.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, requestOptions);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -105,5 +113,11 @@ export const getCurrentQuestion = async (params: {
     user_id,
   };
   const response = await fetchApiData<IGetCurrentQuestionResponse>(url, 'POST', body);
+  return response.data;
+};
+
+export const getPastInterviews = async (): Promise<GetPastInterviewsResponse> => {
+  const url = getNiyatiBackendApiUrl(EBackendEndpoints.GET_PAST_INTERVIEWS);
+  const response = await fetchApiData<GetPastInterviewsResponse>(url, 'GET');
   return response.data;
 };

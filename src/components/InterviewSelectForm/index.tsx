@@ -26,6 +26,7 @@ import { initialzeInterviewForm } from './util';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { EDomain } from '@/constants/interview';
 
 type FormValues = {
   role: string;
@@ -39,6 +40,9 @@ type FormValues = {
 export default function StartInterviewForm(props: TInterviewSelectFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      domain: EDomain.SOFTWARE_ENGINEER,
+    },
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -70,10 +74,12 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
     }
   }
 
+  const filteredFormFields = Object.entries(FORM_FIELDS).filter(([key]) => key !== 'domain'); // TODO: Re-access this after more options are added
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {Object.entries(FORM_FIELDS).map(([key, field]) => (
+        {filteredFormFields.map(([key, field]) => (
           <FormField
             key={key}
             control={form.control}
