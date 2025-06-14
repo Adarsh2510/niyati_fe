@@ -1,7 +1,7 @@
 'use client';
 
 import { speakText } from './speechController';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import {
   currentQuestionAtom,
   isSpeakingAtom,
@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import JudgeCodeEditor from './AnswerBoardTools/JudgeCodeEditor';
 import Caption from './Caption';
 import dynamic from 'next/dynamic';
+import QuestionSectionSkeleton from './QuestionSectionSkeleton';
 
 const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanvas'), {
   ssr: false,
@@ -24,10 +25,10 @@ const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanv
 
 function InterviewerAvatarCanvas() {
   return (
-    <>
+    <Suspense fallback={null}>
       <Environment preset="sunset" />
       <InterviewerAvatar position={[0, -3, -2]} scale={2} />
-    </>
+    </Suspense>
   );
 }
 
@@ -36,6 +37,7 @@ type TAnswerBoard = {
   answerBoardPlaceholder?: string;
   questionTestCases?: string[];
 };
+
 const answerBoard = (props: TAnswerBoard) => {
   switch (props.solutionType) {
     case ESolutionType.WHITEBOARD_IMAGE:
@@ -55,6 +57,8 @@ const answerBoard = (props: TAnswerBoard) => {
 
 const QuestionSection = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const answerBoardPlaceholder = useAtomValue(answerBoardPlaceholderAtom);
   const currentQuestion = useAtomValue(currentQuestionAtom);
   const questionText = currentQuestion?.current_question?.question_text;
@@ -65,32 +69,54 @@ const QuestionSection = () => {
   const isSpeaking = useAtomValue(isSpeakingAtom);
   const currentWordIndex = useAtomValue(currentWordIndexAtom);
 
+  // Handle initial mounting
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Handle asset loading
   useEffect(() => {
-    if (isMounted && questionText) {
+    if (!isMounted) return;
+
+    // Minimum loading time to prevent flash
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate asset loading (replace with actual asset loading check if needed)
+    Promise.all([minLoadingTime]).then(() => {
+      setIsAssetsLoaded(true);
+      setIsLoading(false);
+    });
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (isMounted && questionText && !isLoading) {
       speakText({
         text: questionText,
         setIsSpeaking,
         setCurrentWordIndex,
       });
     }
-  }, [questionText, currentQuestion?._repeatId, setIsSpeaking, setCurrentWordIndex, isMounted]);
+  }, [
+    questionText,
+    currentQuestion?._repeatId,
+    setIsSpeaking,
+    setCurrentWordIndex,
+    isMounted,
+    isLoading,
+  ]);
 
   const answerBoardComponent = useMemo(() => {
-    if (!isMounted) return null;
+    if (!isMounted || isLoading) return null;
 
     return answerBoard({
       solutionType,
       answerBoardPlaceholder,
       questionTestCases,
     });
-  }, [solutionType, answerBoardPlaceholder, questionTestCases, isMounted]);
+  }, [solutionType, answerBoardPlaceholder, questionTestCases, isMounted, isLoading]);
 
-  if (!isMounted) {
-    return <div className="h-[85vh] flex items-center justify-center">Loading question...</div>;
+  if (!isMounted || isLoading || !isAssetsLoaded) {
+    return <QuestionSectionSkeleton />;
   }
 
   return (
