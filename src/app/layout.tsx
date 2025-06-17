@@ -14,6 +14,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = generateMetadata({
   title: DEFAULT_TITLE,
   description: DEFAULT_DESCRIPTION,
+  icons: {
+    icon: '/engineer.svg',
+    shortcut: '/engineer.svg',
+    apple: '/engineer.svg',
+  },
 });
 
 export default function RootLayout({

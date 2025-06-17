@@ -16,6 +16,11 @@ interface MetadataOptions {
   path?: string;
   noIndex?: boolean;
   ogImageUrl?: string;
+  icons?: {
+    icon?: string;
+    shortcut?: string;
+    apple?: string;
+  };
 }
 
 /**
@@ -28,6 +33,11 @@ export function generateMetadata({
   path = '/',
   noIndex = false,
   ogImageUrl = SEO_IMAGES.ogImage,
+  icons = {
+    icon: '/engineer.svg',
+    shortcut: '/engineer.svg',
+    apple: '/engineer.svg',
+  },
 }: MetadataOptions = {}): Metadata {
   const canonicalUrl = `${SITE_URL}${path}`;
 
@@ -39,6 +49,7 @@ export function generateMetadata({
     alternates: {
       canonical: path,
     },
+    icons,
     openGraph: {
       title,
       description,
