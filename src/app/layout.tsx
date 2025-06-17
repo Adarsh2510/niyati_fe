@@ -5,13 +5,16 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/components/AuthProvider';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 import ClarityAnalytics from '@/components/analytics/ClarityAnalytics';
+import OrganizationStructuredData from '@/components/structured-data/OrganizationStructuredData';
+import { generateMetadata } from '@/lib/metadata';
+import { DEFAULT_TITLE, DEFAULT_DESCRIPTION } from '@/constants/seo';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Niyati Prep',
-  description: 'Niyati Prep - AI based mock interview prep',
-};
+export const metadata: Metadata = generateMetadata({
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
+});
 
 export default function RootLayout({
   children,
@@ -27,6 +30,7 @@ export default function RootLayout({
         </AuthProvider>
         <ClarityAnalytics />
         <GoogleAnalytics />
+        <OrganizationStructuredData />
       </body>
     </html>
   );

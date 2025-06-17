@@ -45,7 +45,6 @@ const plans = [
     highlight: null,
   },
 ];
-
 export default function PricingSection() {
   return (
     <section id="pricing" className="py-16 bg-white">

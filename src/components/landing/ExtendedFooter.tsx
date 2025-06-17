@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import EngineerLogo from '@/assets/engineer.svg';
 import { Instagram, Linkedin, Twitter } from 'lucide-react';
 
 const footerData = {
@@ -68,7 +67,7 @@ export default function ExtendedFooter() {
         {/* Brand Section */}
         <div className="md:col-span-2 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-2">
-            <Image src={EngineerLogo} alt="Niyati Logo" width={32} height={32} />
+            <Image src={'/engineer.svg'} alt="Niyati Logo" width={32} height={32} />
             <span className="text-xl font-bold tracking-tight">Niyati Prep</span>
           </div>
           <p className="text-gray-500 text-sm">

@@ -11,10 +11,9 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import Conditional from '@/components/Conditional';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Dialog } from '@/components/common/Dialog';
 import StartInterviewForm from '@/components/InterviewSelectForm';
-import { FORM_FIELDS } from '@/constants/startInterviewForm';
 
 export type TDescriptor = {
   title: string;

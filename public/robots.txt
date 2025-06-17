@@ -1,0 +1,13 @@
+# Allow all web crawlers
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+
+# Disallow admin and private areas
+Disallow: /dashboard
+Disallow: /interview-room
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://niyatiprep.com/sitemap.xml 
