@@ -50,6 +50,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const { data: session } = useSession();
   const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use the unified interruption state
   const interruptionState = useAtomValue(interruptionStateAtom);
@@ -71,6 +72,9 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
       }
 
       if (!payload.question) return;
+
+      // Reset submission state when we get a new question
+      setIsSubmitting(false);
 
       const questionType =
         payload.question_type === 'FOLLOW_UP' ? QuestionType.FOLLOW_UP : QuestionType.INITIAL;
@@ -95,7 +99,15 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         message: `Received new question: ${payload.question.question_text}`,
       });
     },
-    [interviewId, router, setCurrentQuestion, setIsAudioChunkSent, socket, setSocket]
+    [
+      interviewId,
+      router,
+      setCurrentQuestion,
+      setIsAudioChunkSent,
+      socket,
+      setSocket,
+      setIsSubmitting,
+    ]
   );
 
   const initializeSocket = useCallback(async () => {
@@ -182,6 +194,15 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
 
   const sendSolution = useSolutionSender(socket);
 
+  const handleSubmitSolution = (commandType: CommandType) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    sendSolution(commandType);
+    if (commandType === CommandType.PARTIAL_SOLUTION) {
+      setIsAudioChunkSent(false);
+    }
+  };
+
   if (!isBrowser) return <UnSupportedBrowser />;
   const isInterviewStarted = !!currentQuestion?.current_question?.question_text;
 
@@ -198,24 +219,19 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         </Button>
         <Button
           variant="default"
-          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted}
+          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
           className={`bg-blue-500 hover:bg-blue-600`}
-          onClick={() => {
-            sendSolution(CommandType.COMPLETE_SOLUTION);
-          }}
+          onClick={() => handleSubmitSolution(CommandType.COMPLETE_SOLUTION)}
         >
-          Submit Solution
+          {isSubmitting ? 'Processing...' : 'Submit Solution'}
         </Button>
         <Button
           variant="outline"
-          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted}
+          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
           className={`bg-purple-500 hover:bg-purple-600`}
-          onClick={() => {
-            sendSolution(CommandType.PARTIAL_SOLUTION);
-            setIsAudioChunkSent(false);
-          }}
+          onClick={() => handleSubmitSolution(CommandType.PARTIAL_SOLUTION)}
         >
-          Submit Partial Response
+          {isSubmitting ? 'Processing...' : 'Submit Partial Response'}
         </Button>
         {socket && (
           <MicrophoneController
