@@ -8,7 +8,7 @@ export default function HeroSection() {
   return (
     <section className="w-full bg-gradient-to-br from-white to-blue-50">
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
-        <div className="flex-1 max-w-xl py-12 md:py-20">
+        <div className="flex-1 md:max-w-xl max-w-sm py-12 md:py-20">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Master Your Interviews with AI</h1>
           <p className="mb-8 text-lg text-gray-700">
             Crack your dream job with AI-powered mock interviews—crafted from top industry

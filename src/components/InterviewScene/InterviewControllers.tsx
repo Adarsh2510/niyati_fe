@@ -139,6 +139,8 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
         setIsSpeaking: setIsInterruptionSpeaking,
         setCurrentWordIndex: setInterruptionWordIndex,
       });
+      // Re-enable submission buttons after interruption message is handled
+      setIsSubmitting(false);
     });
 
     newSocket.connect();

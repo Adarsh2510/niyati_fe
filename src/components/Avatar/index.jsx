@@ -8,7 +8,10 @@ import { useAnimations, useFBX, useGLTF } from '@react-three/drei';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
 import { animations } from '@/constants/interviewer';
 import { useAtomValue } from 'jotai';
-import { isSpeakingAtom } from '../InterviewScene/AnswerBoardTools/atoms';
+import {
+  isSpeakingAtom,
+  isInterruptionSpeakingAtom,
+} from '../InterviewScene/AnswerBoardTools/atoms';
 import { FE_ASSETS } from '@/constants/imageAssets';
 
 export function InterviewerAvatar({ ...props }) {
@@ -33,7 +36,9 @@ export function InterviewerAvatar({ ...props }) {
   }, [meetingAnimations, sittingIdleAnimations, talkingAnimations]);
 
   const group = useRef();
-  const isSpeaking = useAtomValue(isSpeakingAtom);
+  const isSpeakingQuestion = useAtomValue(isSpeakingAtom);
+  const isSpeakingInterruption = useAtomValue(isInterruptionSpeakingAtom);
+  const isSpeaking = isSpeakingQuestion || isSpeakingInterruption;
   const { actions } = useAnimations(processedAnimations, group);
 
   useEffect(() => {

@@ -32,7 +32,7 @@ interface ConnectionConfig {
 }
 
 const DEFAULT_CONFIG: ConnectionConfig = {
-  maxReconnectAttempts: 5,
+  maxReconnectAttempts: 4,
   reconnectDelay: 1000,
   heartbeatDelay: 30000,
   audioThrottleInterval: 5000,
