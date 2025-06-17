@@ -8,6 +8,7 @@ import ClarityAnalytics from '@/components/analytics/ClarityAnalytics';
 import OrganizationStructuredData from '@/components/structured-data/OrganizationStructuredData';
 import { generateMetadata } from '@/lib/metadata';
 import { DEFAULT_TITLE, DEFAULT_DESCRIPTION } from '@/constants/seo';
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ClarityAnalytics />
         <GoogleAnalytics />
         <OrganizationStructuredData />
+        <Analytics />
       </body>
     </html>
   );
