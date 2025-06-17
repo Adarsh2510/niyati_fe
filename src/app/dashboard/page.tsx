@@ -60,7 +60,7 @@ const companySpecificInterviews: TInterviewSuggestionCard[] = [
   },
 ];
 
-const suggestedInterviewsData: TInterviewSuggestionCard[] = [
+export const suggestedInterviewsData: TInterviewSuggestionCard[] = [
   {
     title: 'Frontend Developer Interview',
     subTitle: 'Netflix',
