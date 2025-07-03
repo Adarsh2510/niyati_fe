@@ -25,9 +25,9 @@ import { useRouter } from 'next/navigation';
 import { QuestionType } from '@/constants/questions';
 import { ESolutionType } from '@/constants/interview';
 import { speakText } from './speechController';
-import Caption from './Caption';
 import { CommandType } from '@/types/interview';
 import { useSolutionSender } from './AnswerBoardTools/useSolutionSender';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -209,32 +209,56 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const isInterviewStarted = !!currentQuestion?.current_question?.question_text;
 
   return (
-    <>
+    <TooltipProvider>
       <div className={`flex gap-4 items-center justify-center h-16 ${className}`}>
-        <Button
-          variant="default"
-          disabled={isInterviewStarted}
-          className="bg-green-500 hover:bg-green-600"
-          onClick={handleStartInterview}
-        >
-          Start Interview
-        </Button>
-        <Button
-          variant="default"
-          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
-          className={`bg-blue-500 hover:bg-blue-600`}
-          onClick={() => handleSubmitSolution(CommandType.COMPLETE_SOLUTION)}
-        >
-          {isSubmitting ? 'Processing...' : 'Submit Solution'}
-        </Button>
-        <Button
-          variant="outline"
-          disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
-          className={`bg-purple-500 hover:bg-purple-600`}
-          onClick={() => handleSubmitSolution(CommandType.PARTIAL_SOLUTION)}
-        >
-          {isSubmitting ? 'Processing...' : 'Submit Partial Response'}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              disabled={isInterviewStarted}
+              className="bg-green-500 hover:bg-green-600"
+              onClick={handleStartInterview}
+            >
+              Start / Resume Interview
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {isInterviewStarted ? 'Interview already started' : 'Connect and start your interview'}
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="default"
+              disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
+              className={`bg-blue-500 hover:bg-blue-600`}
+              onClick={() => handleSubmitSolution(CommandType.COMPLETE_SOLUTION)}
+            >
+              {isSubmitting ? 'Processing...' : 'Submit Answer'}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            Submit your complete answer and move to the next question
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
+              className={`bg-purple-500 hover:bg-purple-600`}
+              onClick={() => handleSubmitSolution(CommandType.PARTIAL_SOLUTION)}
+            >
+              {isSubmitting ? 'Processing...' : 'Request Interviewer'}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            Ask for repeating the question or any doubts or ask for a follow-up question
+          </TooltipContent>
+        </Tooltip>
+
         {socket && (
           <MicrophoneController
             socket={socket}
@@ -244,7 +268,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
           />
         )}
       </div>
-    </>
+    </TooltipProvider>
   );
 };
 

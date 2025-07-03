@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { sendLog } from '@/utils/logs';
 import { ELogLevels } from '@/constants/logs';
 import { Mic, MicOff } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface MicrophoneControllerProps {
   socket: InterviewRoomSocket;
@@ -135,21 +136,29 @@ const MicrophoneController: React.FC<MicrophoneControllerProps> = ({
   if (!isBrowser) return null;
 
   return (
-    <div className="flex items-center gap-4 bg-gray-100 rounded-lg min-w-52">
-      <button
-        onClick={toggleRecording}
-        className={`p-3 rounded-full ${
-          isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white transition-colors`}
-        aria-label={isRecording ? 'Stop recording' : 'Start recording'}
-        title={isRecording ? 'Stop recording' : 'Start recording'}
-      >
-        {isRecording ? <MicOff className="animate-pulse" /> : <Mic />}
-      </button>
-      <span className="text-gray-700" aria-live="polite">
-        {isRecording ? 'Mute and send response' : 'Unmute to speak'}
-      </span>
-    </div>
+    <TooltipProvider>
+      <div className="flex items-center gap-4 bg-gray-100 rounded-lg min-w-52 px-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleRecording}
+              className={`p-3 rounded-full ${
+                isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white transition-colors`}
+              aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+            >
+              {isRecording ? <MicOff className="animate-pulse" /> : <Mic />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {isRecording ? 'Stop and process your response' : 'Start speaking'}
+          </TooltipContent>
+        </Tooltip>
+        <span className="text-gray-700" aria-live="polite">
+          {isRecording ? 'Stop Recording' : 'Start Recording'}
+        </span>
+      </div>
+    </TooltipProvider>
   );
 };
 
