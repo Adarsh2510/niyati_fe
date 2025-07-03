@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { EDomain } from '@/constants/interview';
+import { useSession } from 'next-auth/react';
 
 type FormValues = {
   role: string;
@@ -52,13 +53,14 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
   async function onSubmit(values: FormValues) {
     const { role, experience, domain, language, targetCompany, interviewRound } = values;
     setIsLoading(true);
     try {
       const data = await initialzeInterviewForm({
-        user_id: 'test_user_id',
+        user_id: session!.user.id,
         role,
         experience,
         domain,
@@ -67,13 +69,13 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
         interviewRound,
       });
       if (!data.interview_id) {
-        toast('Something went wrong, please try again');
+        toast.error('Failed to create interview session');
+        return;
       }
-      console.log('data.interview_room_id', data.interview_id);
       router.push(`dashboard/interview-room/${data.interview_id}`);
     } catch (error) {
-      console.error(error);
-      toast('Something went wrong, please try again');
+      console.error('Interview initialization error:', error);
+      toast.error('Failed to start interview. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +122,7 @@ export default function StartInterviewForm(props: TInterviewSelectFormProps) {
         <Button disabled={isLoading} type="submit" className="w-full">
           {isLoading ? (
             <>
-              <span className="mr-2">Please wait while we prepare your interview</span>
+              <span className="mr-2">Preparing your interview, can take up to 2 minutes...</span>
               <Loader />
             </>
           ) : (
