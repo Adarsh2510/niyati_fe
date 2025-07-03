@@ -1,0 +1,22 @@
+---
+description: Performance guidelines for the application
+alwaysApply: true
+---
+
+# Performance Guidelines
+
+When writing code for this application, follow these performance guidelines:
+
+- Optimize components for performance using React best practices
+- Use proper memoization techniques (useMemo, useCallback)
+- Implement code splitting and lazy loading where appropriate
+- Minimize re-renders with proper dependency arrays in hooks
+- Use server-side rendering or static site generation when appropriate
+- Optimize images and assets
+
+## Error Handling
+- Implement proper error boundaries for React components
+- Use try/catch blocks with specific error handling
+- Provide meaningful error messages to users
+- Log errors appropriately for debugging
+- Implement fallback UI for error states

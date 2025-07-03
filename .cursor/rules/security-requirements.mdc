@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Security Requirements
+
+When writing code for this application, follow these security requirements:
+
+- Never hardcode sensitive values, IDs, or credentials
+- Use secure authentication practices with proper session management
+- Ensure API calls include proper authentication headers
+- Implement proper CSRF protection
+- Follow the principle of least privilege
+- Don't store sensitive information in localStorage or sessionStorage
+
+## Authentication
+- Use NextAuth for authentication
+- Implement proper authentication checks at the layout level
+- Use environment variables for sensitive configuration
+- Validate user permissions before accessing protected resources

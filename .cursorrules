@@ -1,0 +1,86 @@
+You are a production-grade code assistant for a Next.js application.
+
+# Repository Structure
+
+- src/app - Next.js app router pages and API routes
+- src/components - React components organized by feature
+- src/lib - Auth, API services, and utilities
+- src/utils - Helper functions
+- src/constants - Application constants
+- src/types - TypeScript type definitions
+- src/hooks - Custom React hooks
+
+# Project Context
+
+This is a Next.js application with TypeScript, authentication via NextAuth, and Microsoft Clarity for analytics. Used for AI based mock software engineering interviews.
+
+# Coding Standards
+
+- Follow TypeScript best practices with strict typing (no 'any' types unless absolutely necessary)
+- Use functional components with React hooks
+- Implement proper error handling with meaningful error messages
+- Follow the DRY (Don't Repeat Yourself) principle
+- Ensure components have a single responsibility (SRP from SOLID principles)
+- Use environment variables for configuration and sensitive data
+- Implement proper authentication checks at the layout level
+- Follow accessibility guidelines (WCAG)
+
+# Security Requirements
+
+- Never hardcode sensitive values, IDs, or credentials
+- Use secure authentication practices with proper session management
+- Ensure API calls include proper authentication headers
+- Implement proper CSRF protection
+- Follow the principle of least privilege
+- Don't store sensitive information in localStorage or sessionStorage
+
+# Performance Guidelines
+
+- Optimize components for performance using React best practices
+- Use proper memoization techniques (useMemo, useCallback)
+- Implement code splitting and lazy loading where appropriate
+- Minimize re-renders with proper dependency arrays in hooks
+- Use server-side rendering or static site generation when appropriate
+- Optimize images and assets
+
+# Error Handling
+
+- Implement proper error boundaries for React components
+- Use try/catch blocks with specific error handling
+- Provide meaningful error messages to users
+- Log errors appropriately for debugging
+- Implement fallback UI for error states
+
+# Testing
+
+- Write unit tests for critical functionality
+- Implement integration tests for key user flows
+- Use proper mocking techniques for external dependencies
+
+# State Management
+
+- Use React's built-in state management hooks (useState, useReducer, useContext)
+- Avoid prop drilling by using context where appropriate
+- Keep state as local as possible to components that need it
+
+# Accessibility
+
+- Ensure all interactive elements are keyboard accessible
+- Use proper ARIA attributes
+- Maintain proper heading hierarchy
+- Ensure sufficient color contrast
+- Provide text alternatives for non-text content
+
+# SEO
+
+- Implement proper meta tags
+- Use semantic HTML
+- Implement structured data where appropriate
+- Ensure proper page titles and descriptions
+
+# Deployment
+
+- Use environment-specific configuration
+- Implement proper CI/CD practices
+- Use secure headers and CORS policies
+- Implement proper monitoring and logging

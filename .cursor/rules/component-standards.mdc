@@ -1,0 +1,26 @@
+---
+description: Component standards and best practices
+globs: ["src/components/**/*.tsx", "src/components/**/*.ts"]
+---
+
+# Component Standards
+
+When working with React components in this application:
+
+## State Management
+- Use React's built-in state management hooks (useState, useReducer, useContext)
+- Avoid prop drilling by using context where appropriate
+- Keep state as local as possible to components that need it
+
+## Accessibility
+- Ensure all interactive elements are keyboard accessible
+- Use proper ARIA attributes
+- Maintain proper heading hierarchy
+- Ensure sufficient color contrast
+- Provide text alternatives for non-text content
+
+## SEO
+- Implement proper meta tags
+- Use semantic HTML
+- Implement structured data where appropriate
+- Ensure proper page titles and descriptions

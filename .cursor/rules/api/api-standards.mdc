@@ -1,0 +1,33 @@
+---
+description: Standards for API routes
+globs: ["src/app/api/**/*.ts", "src/app/api/**/*.tsx"]
+---
+
+# API Route Standards
+
+When creating API routes in this application:
+
+- Always validate input data
+- Use proper HTTP status codes
+- Implement proper error handling
+- Include authentication checks where needed
+- Follow RESTful principles
+- Return consistent response formats
+
+## Response Format
+```typescript
+// Success response
+{
+  success: true,
+  data: any // The response data
+}
+
+// Error response
+{
+  success: false,
+  error: {
+    message: string, // User-friendly error message
+    code: string    // Optional error code
+  }
+}
+```

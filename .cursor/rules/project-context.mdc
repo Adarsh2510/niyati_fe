@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Next.js Interview Application
+
+This is a Next.js application with TypeScript, authentication via NextAuth, and Microsoft Clarity for analytics. Used for AI-based mock software engineering interviews.
+
+## Repository Structure
+- src/app - Next.js app router pages and API routes
+- src/components - React components organized by feature
+- src/lib - Auth, API services, and utilities
+- src/utils - Helper functions
+- src/constants - Application constants
+- src/types - TypeScript type definitions
+- src/hooks - Custom React hooks
+
+## Coding Standards
+- TypeScript with strict typing (avoid 'any')
+- Functional React components with hooks
+- Error handling with meaningful messages
+- DRY principle and SRP (SOLID)
+- Environment variables for configuration
+- Layout-level authentication checks
+- WCAG accessibility compliance

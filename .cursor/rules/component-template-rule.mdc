@@ -1,0 +1,14 @@
+---
+description: Template for creating new React components
+globs: 
+alwaysApply: false
+---
+
+# React Component Template
+
+Use this template when creating new React components:
+
+- Follow the structure in the template
+- Define a clear interface for props
+- Use proper state management with hooks
+- Include JSDoc comments for complex logic
