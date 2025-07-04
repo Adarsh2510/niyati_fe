@@ -9,7 +9,9 @@ export interface UserDB {
   id: string;
   name: string;
   email: string;
-  hashed_password: string;
+  hashed_password?: string;
+  provider?: string;
+  provider_account_id?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -33,6 +35,21 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  id: string;
+  name: string;
+  email: string;
+  accessToken: string;
+}
+
+export interface OAuthRequest {
+  provider: string;
+  token: string;
+  name: string;
+  email: string;
+  provider_account_id: string;
+}
+
+export interface OAuthResponse {
   id: string;
   name: string;
   email: string;
@@ -68,6 +85,8 @@ export interface JWTType {
   name?: string;
   email?: string;
   accessToken?: string;
+  provider?: string;
+  provider_account_id?: string;
   iat: number;
   exp: number;
 }

@@ -4,7 +4,7 @@ This is a Next.js application that provides interview tools with features includ
 
 ## Features
 
-- Authentication using NextAuth.js
+- Authentication using NextAuth.js with Google OAuth
 - Real-time communication via WebSockets
 - Code execution using Judge0 API
 - Image uploads with Cloudinary
@@ -16,6 +16,7 @@ This is a Next.js application that provides interview tools with features includ
 - pnpm 9.x or later (recommended)
 - Backend API server running (for authentication and data)
 - WebSocket server running (for real-time communication)
+- Google Cloud Platform account (for OAuth)
 
 ## Environment Variables
 
@@ -26,8 +27,13 @@ Before running the application, you need to set up the following environment var
 NEXTAUTH_SECRET=your_nextauth_secret_here
 NEXTAUTH_URL=http://localhost:3000  # Change to your production URL for Vercel deployment
 
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
 # Backend API Configuration
 NEXT_PUBLIC_BE_ENDPOINT=http://localhost:8000  # Your backend API endpoint
+NEXT_PUBLIC_API_URL=http://localhost:8000      # Your API endpoint for OAuth callbacks
 
 # WebSocket Configuration
 NEXT_PUBLIC_WS_URL=ws://localhost:8000  # Your WebSocket server URL
@@ -45,6 +51,18 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
+
+## Setting up Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Navigate to "APIs & Services" > "Credentials"
+4. Click "Create Credentials" > "OAuth client ID"
+5. Configure the OAuth consent screen
+6. Create an OAuth 2.0 client ID
+7. Add your domain to the authorized JavaScript origins (e.g., http://localhost:3000 for development)
+8. Add your callback URL to the authorized redirect URIs (e.g., http://localhost:3000/api/auth/callback/google)
+9. Copy the Client ID and Client Secret to your .env.local file
 
 ## Getting Started
 

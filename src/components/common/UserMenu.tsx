@@ -38,7 +38,9 @@ export default function UserMenu() {
           <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200">
             Signed in as
             <br />
-            <span className="font-medium">{session?.user?.email}</span>
+            <span className="font-medium block truncate overflow-hidden text-ellipsis max-w-full">
+              {session?.user?.email}
+            </span>
           </div>
 
           <button

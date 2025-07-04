@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { LoginRequest } from '@/types/auth';
+import OAuthProviders from '@/components/auth/OAuthProviders';
 
 function LoginContent() {
   const router = useRouter();
@@ -42,13 +43,12 @@ function LoginContent() {
       const result = await signIn('credentials', {
         email: loginData.email,
         password: loginData.password,
+        redirect: false,
         callbackUrl,
       });
 
       if (result?.error) {
         toast.error('Invalid credentials');
-      } else {
-        toast.error('An unknown error occurred during login.');
       }
       setIsLoading(false);
     } catch (error) {
@@ -106,6 +106,19 @@ function LoginContent() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* OAuth Providers */}
+          <OAuthProviders callbackUrl={callbackUrl} isSignUp={false} />
+
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-blue-600 hover:underline">
@@ -121,7 +134,11 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense
-      fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p className="text-lg">Loading...</p>
+        </div>
+      }
     >
       <LoginContent />
     </Suspense>

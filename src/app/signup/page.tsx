@@ -10,6 +10,7 @@ import { registerUser } from '@/lib/auth';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { RegisterRequest } from '@/types/auth';
+import OAuthProviders from '@/components/auth/OAuthProviders';
 
 function SignupContent() {
   const router = useRouter();
@@ -160,6 +161,19 @@ function SignupContent() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* OAuth Providers */}
+          <OAuthProviders callbackUrl={callbackUrl} isSignUp={true} />
+
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-blue-600 hover:underline">
@@ -175,7 +189,11 @@ function SignupContent() {
 export default function SignupPage() {
   return (
     <Suspense
-      fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p className="text-lg">Loading...</p>
+        </div>
+      }
     >
       <SignupContent />
     </Suspense>
