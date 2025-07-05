@@ -9,7 +9,7 @@ export default function CTABanner() {
         <p className="mb-8 text-gray-700">
           Join thousands of professionals who have improved their interview skills with Niyati
         </p>
-        <Link href="/login">
+        <Link href="/signup">
           <Button size="lg" variant="gradient">
             Start Free Practice
           </Button>

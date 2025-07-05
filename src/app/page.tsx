@@ -32,7 +32,7 @@ export default function LandingPage() {
           { label: 'Pricing', href: '#pricing' },
           { label: 'Testimonials', href: '#testimonials' },
         ]}
-        cta={{ label: 'Go to Dashboard', href: '/dashboard' }}
+        cta={{ label: 'Try for Free', href: '/signup' }}
       />
       <HeroSection />
       <FeaturesSection />

@@ -13,6 +13,7 @@ export interface HeaderProps {
   brandName?: string;
   navLinks?: HeaderNavLink[];
   cta?: { label: string; href: string };
+  showLoginButton?: boolean;
 }
 
 export default function Header({
@@ -21,6 +22,7 @@ export default function Header({
   brandName = '',
   navLinks = [],
   cta,
+  showLoginButton = true,
 }: HeaderProps) {
   return (
     <header className="w-full bg-white shadow-sm">
@@ -38,8 +40,19 @@ export default function Header({
             ))}
           </nav>
         )}
-        {cta && (
-          <div className="flex gap-2">
+        <div className="flex gap-2 items-center pr-8">
+          {showLoginButton && (
+            <Link href="/login">
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:text-blue-600"
+              >
+                Go to Dashboard
+              </Button>
+            </Link>
+          )}
+          {cta && (
             <Link href={cta.href}>
               <Button
                 size="sm"
@@ -48,8 +61,8 @@ export default function Header({
                 {cta.label}
               </Button>
             </Link>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

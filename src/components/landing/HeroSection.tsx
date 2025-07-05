@@ -15,7 +15,7 @@ export default function HeroSection() {
             leader&apos;s real experiences and a vast question bank. Get detailed feedback and boost
             your confidence!
           </p>
-          <Link href="/login">
+          <Link href="/signup">
             <Button size="lg" variant="gradient">
               Start Free Practice
             </Button>
