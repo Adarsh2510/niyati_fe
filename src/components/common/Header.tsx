@@ -40,7 +40,7 @@ export default function Header({
             ))}
           </nav>
         )}
-        <div className="flex gap-2 items-center pr-8">
+        <div className="flex gap-2 items-center md:pr-16">
           {showLoginButton && (
             <Link href="/login">
               <Button

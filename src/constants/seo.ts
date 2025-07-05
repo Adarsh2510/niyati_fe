@@ -2,10 +2,11 @@
 export const SITE_NAME = 'Niyati Prep';
 export const SITE_URL = 'https://niyatiprep.com';
 export const SITE_DESCRIPTION =
-  'AI-powered mock interview platform for job seekers to practice and improve their interview skills';
-export const DEFAULT_TITLE = 'Niyati Prep | AI-Powered Mock Interview Platform';
+  'Niyati Prep offers AI-powered mock interviews for software engineering roles. Practice coding, system design, and behavioral interviews with instant feedback, real questions, and detailed analytics. Trusted by engineers at top tech companies.';
+export const DEFAULT_TITLE =
+  'AI Mock Interviews for Software Engineers | Practice Coding, System Design & Behavioral Rounds';
 export const DEFAULT_DESCRIPTION =
-  'Prepare for job interviews with AI-powered mock interviews, personalized feedback, and expert coaching. Improve your interview skills and land your dream job.';
+  'Niyati Prep offers AI-powered mock interviews for software engineering roles. Practice coding, system design, and behavioral interviews with instant feedback, real questions, and detailed analytics. Trusted by engineers at top tech companies.';
 
 // Social media handles
 //TODO: Add social media handles later
@@ -40,6 +41,15 @@ export const COMMON_KEYWORDS = [
   'free mock interview',
   'software engineer mock interview',
   'software engineer jobs',
+  'AI mock interview for software engineers',
+  'coding interview practice',
+  'system design interview simulator',
+  'behavioral interview AI',
+  'software engineering job prep',
+  'technical interview feedback',
+  'practice interviews for Google, Amazon, Meta, Microsoft',
+  'AI interview analytics',
+  'realistic tech interview practice',
 ];
 
 // Page-specific keywords

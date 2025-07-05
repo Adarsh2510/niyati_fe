@@ -9,17 +9,29 @@ export default function HeroSection() {
     <section className="w-full bg-gradient-to-br from-white to-blue-50">
       <div className="container mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
         <div className="flex-1 md:max-w-xl max-w-sm py-12 md:py-20">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Master Your Interviews with AI</h1>
+          <span className="text-blue-600 font-semibold uppercase tracking-wide mb-2 block">
+            Land Your Dream Tech Job
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Crack Your Next Software Engineering Interview with AI
+          </h1>
           <p className="mb-8 text-lg text-gray-700">
-            Crack your dream job with AI-powered mock interviews—crafted from top industry
-            leader&apos;s real experiences and a vast question bank. Get detailed feedback and boost
-            your confidence!
+            Practice real coding, system design, and behavioral interviews with AI-powered mock
+            interviews crafted from top industry experiences and a vast question bank. Get instant,
+            personalized feedback and boost your confidence to land your dream job !
           </p>
-          <Link href="/signup">
-            <Button size="lg" variant="gradient">
-              Start Free Practice
-            </Button>
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/signup">
+              <Button size="lg" variant="gradient">
+                Start Free Practice
+              </Button>
+            </Link>
+            <Link href="#how-it-works">
+              <Button size="lg" variant="outline">
+                See How It Works
+              </Button>
+            </Link>
+          </div>
           <div className="mt-8">
             <p className="text-xs text-gray-500 mb-2">Trusted by professionals from</p>
             <div className="flex gap-4 items-center">
