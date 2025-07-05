@@ -17,6 +17,7 @@ function SignupContent() {
   const { status } = useSession();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const error = searchParams.get('error');
 
   const [formData, setFormData] = useState<RegisterRequest & { confirmPassword: string }>({
     name: '',
@@ -25,6 +26,21 @@ function SignupContent() {
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle errors from URL parameters
+  useEffect(() => {
+    if (error) {
+      if (error === 'OAuthAccountNotLinked') {
+        toast.error(
+          'This email is already registered with a different sign-in method. Try logging-in instead.'
+        );
+        // Redirect to login page after showing the error
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      }
+    }
+  }, [error, router]);
 
   // Redirect if already authenticated
   useEffect(() => {

@@ -16,12 +16,26 @@ function LoginContent() {
   const { status } = useSession();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const error = searchParams.get('error');
 
   const [loginData, setLoginData] = useState<LoginRequest>({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle errors from URL parameters
+  useEffect(() => {
+    if (error) {
+      if (error === 'OAuthAccountNotLinked') {
+        toast.error(
+          'This email is already registered with a different sign-in method. Try logging-in instead.'
+        );
+      } else if (error === 'CredentialsSignin') {
+        toast.error('Invalid email or password');
+      }
+    }
+  }, [error]);
 
   // Redirect if already authenticated
   useEffect(() => {

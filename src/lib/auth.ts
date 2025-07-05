@@ -46,7 +46,10 @@ export const registerUser = async (userData: RegisterRequest): Promise<RegisterR
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `Registration failed with status: ${response.status}`);
+
+      const backendMsg = errorData?.detail || errorData?.message;
+
+      throw new Error(backendMsg || `Registration failed with status: ${response.status}`);
     }
 
     return await response.json();
@@ -75,9 +78,17 @@ export const authenticateOAuth = async (oauthData: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(
-        errorData?.message || `OAuth authentication failed with status: ${response.status}`
-      );
+
+      // Prefer backend `detail` field over the old `message`
+      const backendMsg = errorData?.detail || errorData?.message;
+
+      // Custom handling for new 409 rule
+      if (response.status === 409) {
+        // Throw a predictable slug so the UI / NextAuth error page can pick it up
+        throw new Error('OAuthAccountNotLinked');
+      }
+
+      throw new Error(backendMsg || `OAuth authentication failed (status: ${response.status})`);
     }
 
     return await response.json();
