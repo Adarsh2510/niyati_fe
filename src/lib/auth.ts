@@ -46,9 +46,7 @@ export const registerUser = async (userData: RegisterRequest): Promise<RegisterR
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-
       const backendMsg = errorData?.detail || errorData?.message;
-
       throw new Error(backendMsg || `Registration failed with status: ${response.status}`);
     }
 
@@ -78,13 +76,10 @@ export const authenticateOAuth = async (oauthData: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-
-      // Prefer backend `detail` field over the old `message`
       const backendMsg = errorData?.detail || errorData?.message;
 
       // Custom handling for new 409 rule
       if (response.status === 409) {
-        // Throw a predictable slug so the UI / NextAuth error page can pick it up
         throw new Error('OAuthAccountNotLinked');
       }
 
@@ -117,7 +112,6 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           };
 
-          // Replace this with your actual authentication endpoint
           const response = await fetch(getNiyatiBackendApiUrl('/api/v1/auth/login'), {
             method: 'POST',
             headers: {
@@ -143,9 +137,11 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 24 * 60 * 60,
   },
   callbacks: {
     async jwt({ token, user, account }) {
+      // Store user data in token when signing in
       if (user) {
         token.accessToken = user.accessToken;
         token.id = user.id;
@@ -169,7 +165,7 @@ export const authOptions: NextAuthOptions = {
         session.accessToken = token.accessToken as string;
       }
 
-      // Handle OAuth authentication for any provider
+      // Handle OAuth authentication if we have provider info but no access token
       if (token.provider && token.provider_account_id && !session.accessToken) {
         try {
           const response = await authenticateOAuth({

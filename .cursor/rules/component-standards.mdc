@@ -1,6 +1,7 @@
 ---
 description: Component standards and best practices
 globs: ["src/components/**/*.tsx", "src/components/**/*.ts"]
+alwaysApply: false
 ---
 
 # Component Standards
@@ -24,3 +25,9 @@ When working with React components in this application:
 - Use semantic HTML
 - Implement structured data where appropriate
 - Ensure proper page titles and descriptions
+
+- Use functional components and React hooks
+- Ensure accessibility (WCAG) compliance
+- Keep components focused and reusable
+- Use TypeScript with strict typing
+- Leverage ErrorBoundary and Suspense for error and loading handling in all new components. Provide a custom fallback UI if needed, or rely on the default.

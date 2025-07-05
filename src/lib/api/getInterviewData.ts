@@ -17,12 +17,30 @@ import { getServerSession } from 'next-auth';
 import { getSession } from 'next-auth/react';
 import { authOptions } from '@/lib/auth';
 
+// Simple in-memory cache for GET requests
+const apiCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute cache TTL
+
+/**
+ * Fetches data from API with authentication and caching
+ */
 const fetchApiData = async <T>(
   url: string,
   method: string,
   body?: any
 ): Promise<IApiResponse<T>> => {
   try {
+    // Generate cache key for GET requests
+    const cacheKey = method === 'GET' ? url : '';
+
+    // Check cache for GET requests
+    if (method === 'GET' && cacheKey) {
+      const cachedResponse = apiCache.get(cacheKey);
+      if (cachedResponse && Date.now() - cachedResponse.timestamp < CACHE_TTL) {
+        return { data: cachedResponse.data, status: 200, cached: true };
+      }
+    }
+
     // Try server-side session first, then fall back to client-side session
     let session;
     try {
@@ -45,18 +63,54 @@ const fetchApiData = async <T>(
       requestOptions.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, requestOptions);
+    // Simple retry logic for network errors
+    let response: Response | undefined;
+    let retries = 2;
+
+    while (retries >= 0) {
+      try {
+        response = await fetch(url, requestOptions);
+        break;
+      } catch (error) {
+        if (retries === 0) throw error;
+        retries--;
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    // If we still don't have a response after retries, throw an error
+    if (!response) {
+      throw new Error('Failed to fetch data after retries');
+    }
 
     if (!response.ok) {
+      // Handle common error status codes
+      if (response.status === 401) {
+        throw new Error('Authentication failed');
+      } else if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data: T = await response.json();
+
+    // Cache GET responses
+    if (method === 'GET' && cacheKey) {
+      apiCache.set(cacheKey, { data, timestamp: Date.now() });
+    }
+
     return { data, status: response.status };
   } catch (error) {
     sendLog({ err: error as Error, level: ELogLevels.Error });
     throw error;
   }
+};
+
+// Clear cache when needed (e.g., on logout)
+export const clearApiCache = () => {
+  apiCache.clear();
 };
 
 export const getNextQuestion = async (

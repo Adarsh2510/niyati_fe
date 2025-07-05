@@ -3,6 +3,7 @@ import { ESolutionType } from '@/constants/interview';
 export interface IApiResponse<T> {
   data: T;
   status: number;
+  cached?: boolean;
 }
 
 export interface IGetNextQuestionParams {

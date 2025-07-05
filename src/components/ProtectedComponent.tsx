@@ -3,19 +3,20 @@
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface ProtectedComponentProps {
   children: React.ReactNode;
 }
 
 export function ProtectedComponent({ children }: ProtectedComponentProps) {
-  const { status, data: session } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      // Redirect to login with the current path as callback URL
+      toast.error('Please sign in to access this page');
       router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
   }, [status, router, pathname]);
@@ -30,7 +31,7 @@ export function ProtectedComponent({ children }: ProtectedComponentProps) {
   }
 
   // Only render children if authenticated
-  if (status === 'authenticated' && session) {
+  if (status === 'authenticated') {
     return <>{children}</>;
   }
 
