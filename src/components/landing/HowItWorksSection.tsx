@@ -29,6 +29,39 @@ export default function HowItWorksSection() {
             </div>
           ))}
         </div>
+
+        {/* Demo Video */}
+        <div className="mt-16">
+          <h3 className="text-xl md:text-2xl font-bold text-center mb-8">See It In Action</h3>
+          <div className="max-w-4xl mx-auto">
+            <div
+              style={{
+                position: 'relative',
+                boxSizing: 'content-box',
+                maxHeight: '80vh',
+                width: '100%',
+                aspectRatio: '1.764294049008168',
+                padding: '40px 0 40px 0',
+              }}
+            >
+              <iframe
+                src="https://app.supademo.com/embed/cmcrs2nus050a9st8kcl51vju?embed_v=2"
+                loading="lazy"
+                title="Niyatiprep Demo"
+                allow="clipboard-write"
+                frameBorder="0"
+                allowFullScreen
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
