@@ -11,7 +11,7 @@ export const DEFAULT_DESCRIPTION =
 // Social media handles
 //TODO: Add social media handles later
 export const SOCIAL_MEDIA = {
-  twitter: 'https://twitter.com/niyatiprep',
+  twitter: 'https://x.com/adarsh__trivedi',
   linkedin: 'https://www.linkedin.com/company/niyatiprep',
   facebook: 'https://www.facebook.com/profile.php?id=61574075484752',
   instagram: 'https://www.instagram.com/niyatiprep/',

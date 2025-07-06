@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Instagram, Linkedin, Twitter } from 'lucide-react';
+import { SOCIAL_MEDIA } from '@/constants/seo';
 
 const footerData = {
   product: [
@@ -21,17 +22,17 @@ const footerData = {
   social: [
     {
       name: 'LinkedIn',
-      href: '#',
+      href: SOCIAL_MEDIA.linkedin,
       icon: <Linkedin />,
     },
     {
       name: 'Twitter',
-      href: '#',
+      href: SOCIAL_MEDIA.twitter,
       icon: <Twitter />,
     },
     {
       name: 'Instagram',
-      href: 'https://www.instagram.com/niyatiprep/',
+      href: SOCIAL_MEDIA.instagram,
       icon: <Instagram />,
     },
   ],
