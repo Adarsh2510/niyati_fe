@@ -15,11 +15,11 @@ interface ExitWarningModalProps {
 }
 
 const EXIT_REASONS = [
-  { value: 'technical-issues', label: 'Technical issues' },
   { value: 'too-long', label: 'Interview too long' },
   { value: 'difficult-questions', label: 'Questions too difficult' },
   { value: 'interface-problems', label: 'Interface problems' },
-  { value: 'personal-emergency', label: 'Personal emergency' },
+  { value: 'personal-reason', label: 'Personal reason' },
+  { value: 'irrelevant-questions', label: 'Irrelevant questions' },
   { value: 'other', label: 'Other reason' },
 ] as const;
 

@@ -84,7 +84,7 @@ export default function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/signup" className="w-full">
+                <Link href="/demo" className="w-full">
                   <Button
                     size="lg"
                     className={`w-full ${
