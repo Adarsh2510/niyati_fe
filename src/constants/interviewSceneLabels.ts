@@ -2,11 +2,11 @@ import { ESolutionType } from './interview';
 
 export const answerBoardPlaceholders = {
   [ESolutionType.CODE_SOLUTION]:
-    'Please record your answer using microphone button \nand type in your any supporting text or code here. \nFinally, please click on submit button to save your answer.',
+    '// Type your code solution here\n// You can also add comments to explain your approach',
   [ESolutionType.WHITEBOARD_IMAGE]:
-    'Please record your answer using microphone button \nand draw your supporting whiteboard image here. \nFinally, please click on submit button to save your answer.',
+    "// Use the whiteboard to draw your solution\n// Click save when you're done",
   [ESolutionType.CODE_REPO_WITH_OUTPUT]:
-    'Please record your audio using microphone button \nand type in your any supporting text or code here. \nFinally, please click on submit button to save your answer.',
+    '// Type your code solution here\n// Include any supporting text or explanations',
   [ESolutionType.TEXT_ANSWER]:
-    'Please record your answer using microphone button \nand type in your any supporting text here. \nFinally, please click on submit button to save your answer.',
+    '// Type your answer here\n// You can include explanations, examples, or additional context',
 };

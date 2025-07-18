@@ -19,13 +19,9 @@ export const currentQuestionAtom = atom<
 >(null);
 export const answerBoardPlaceholderAtom = atom<string>(get => {
   const currentQuestion = get(currentQuestionAtom);
-  const questionText = currentQuestion?.current_question?.question_text;
   const solutionType = currentQuestion?.solution_type ?? ESolutionType.TEXT_ANSWER;
 
-  return questionText
-    ? `### Question: ${questionText?.replace(/\n{2,}/g, '\n')}\n` +
-        answerBoardPlaceholders[solutionType]
-    : answerBoardPlaceholders[solutionType];
+  return answerBoardPlaceholders[solutionType];
 });
 export const currentWordIndexAtom = atom(-1);
 export const excalidrawRefAtom = atom(isBrowser ? createExcalidrawRef() : { current: null });
