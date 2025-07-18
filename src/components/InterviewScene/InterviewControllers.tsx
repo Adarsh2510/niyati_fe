@@ -28,6 +28,7 @@ import { speakText } from './speechController';
 import { CommandType } from '@/types/interview';
 import { useSolutionSender } from './AnswerBoardTools/useSolutionSender';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import InterviewOnboardingModal from './InterviewOnboardingModal';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -37,6 +38,18 @@ interface InterviewControllersProps {
   className?: string;
   interviewId: string;
 }
+const mapSolutionType = (type: string): ESolutionType => {
+  switch (type) {
+    case 'CODE_SOLUTION':
+      return ESolutionType.CODE_SOLUTION;
+    case 'WHITEBOARD_IMAGE':
+      return ESolutionType.WHITEBOARD_IMAGE;
+    case 'CODE_REPO_WITH_OUTPUT':
+      return ESolutionType.CODE_REPO_WITH_OUTPUT;
+    default:
+      return ESolutionType.TEXT_ANSWER;
+  }
+};
 
 const InterviewControllers: React.FC<InterviewControllersProps> = ({
   handleNextQuestion,
@@ -51,6 +64,7 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Use the unified interruption state
   const interruptionState = useAtomValue(interruptionStateAtom);
@@ -170,6 +184,19 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
     setupSocket();
   }, [initializeSocket]);
 
+  // Show onboarding modal on first load
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('interview-onboarding-completed');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('interview-onboarding-completed', 'true');
+    setShowOnboarding(false);
+  };
+
   // Add cleanup on unmount
   useEffect(() => {
     return () => {
@@ -209,81 +236,76 @@ const InterviewControllers: React.FC<InterviewControllersProps> = ({
   const isInterviewStarted = !!currentQuestion?.current_question?.question_text;
 
   return (
-    <TooltipProvider>
-      <div className={`flex gap-4 items-center justify-center h-16 ${className}`}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="default"
-              disabled={isInterviewStarted}
-              className="bg-green-500 hover:bg-green-600"
-              onClick={handleStartInterview}
-            >
-              Start / Resume Interview
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            {isInterviewStarted ? 'Interview already started' : 'Connect and start your interview'}
-          </TooltipContent>
-        </Tooltip>
+    <>
+      <InterviewOnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+      />
+      <TooltipProvider>
+        <div className={`flex gap-4 items-center justify-center h-16 ${className}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="default"
+                disabled={isInterviewStarted}
+                className="bg-green-500 hover:bg-green-600"
+                onClick={handleStartInterview}
+              >
+                Start / Resume Interview
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              {isInterviewStarted
+                ? 'Interview already started'
+                : 'Connect and start your interview'}
+            </TooltipContent>
+          </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="default"
-              disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
-              className={`bg-blue-500 hover:bg-blue-600`}
-              onClick={() => handleSubmitSolution(CommandType.COMPLETE_SOLUTION)}
-            >
-              {isSubmitting ? 'Processing...' : 'Submit Answer'}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            Submit your complete answer and move to the next question
-          </TooltipContent>
-        </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="default"
+                disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
+                className={`bg-blue-500 hover:bg-blue-600`}
+                onClick={() => handleSubmitSolution(CommandType.COMPLETE_SOLUTION)}
+              >
+                {isSubmitting ? 'Processing...' : 'Submit Answer'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Submit your complete answer and move to the next question
+            </TooltipContent>
+          </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
-              className={`bg-purple-500 hover:bg-purple-600`}
-              onClick={() => handleSubmitSolution(CommandType.PARTIAL_SOLUTION)}
-            >
-              {isSubmitting ? 'Processing...' : 'Request Interviewer'}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            Ask for repeating the question or any doubts or ask for a follow-up question
-          </TooltipContent>
-        </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={isRecording || !isAudioChunkSent || !isInterviewStarted || isSubmitting}
+                className={`bg-purple-500 hover:bg-purple-600`}
+                onClick={() => handleSubmitSolution(CommandType.PARTIAL_SOLUTION)}
+              >
+                {isSubmitting ? 'Processing...' : 'Request Interviewer'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Ask for repeating the question or any doubts or ask for a follow-up question
+            </TooltipContent>
+          </Tooltip>
 
-        {socket && (
-          <MicrophoneController
-            socket={socket}
-            isRecording={isRecording}
-            onRecordingChange={handleRecordingChange}
-            setIsAudioChunkSent={setIsAudioChunkSent}
-          />
-        )}
-      </div>
-    </TooltipProvider>
+          {socket && (
+            <MicrophoneController
+              socket={socket}
+              isRecording={isRecording}
+              onRecordingChange={handleRecordingChange}
+              setIsAudioChunkSent={setIsAudioChunkSent}
+            />
+          )}
+        </div>
+      </TooltipProvider>
+    </>
   );
-};
-
-// Helper function to map solution types
-const mapSolutionType = (type: string): ESolutionType => {
-  switch (type) {
-    case 'CODE_SOLUTION':
-      return ESolutionType.CODE_SOLUTION;
-    case 'WHITEBOARD_IMAGE':
-      return ESolutionType.WHITEBOARD_IMAGE;
-    case 'CODE_REPO_WITH_OUTPUT':
-      return ESolutionType.CODE_REPO_WITH_OUTPUT;
-    default:
-      return ESolutionType.TEXT_ANSWER;
-  }
 };
 
 export default InterviewControllers;

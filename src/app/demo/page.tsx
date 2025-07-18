@@ -33,6 +33,7 @@ const DemoPage = () => {
       handleSignUp();
     }
     if (status === 'authenticated') {
+      localStorage.removeItem('interview-onboarding-completed');
       router.push(`/dashboard/interview-room/${demoInterviewId}`);
     }
   }, [status, router]);
