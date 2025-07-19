@@ -15,7 +15,7 @@ export default function ProBanner() {
           <p className="text-white text-2xl mb-6 max-w-xl">
             Practice interviews with real-time AI feedback and unlock premium features – for free!
           </p>
-          <Link href="/signup">
+          <Link href="/demo">
             <Button className="bg-blue-500 hover:bg-blue-800 text-white text-xl px-12 py-6 rounded-full font-semibold shadow-lg">
               Let&apos;s Get Started <ArrowRightIcon className="w-4 h-4 ml-2" />
             </Button>

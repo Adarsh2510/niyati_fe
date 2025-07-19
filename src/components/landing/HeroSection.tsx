@@ -21,7 +21,7 @@ export default function HeroSection() {
             personalized feedback and boost your confidence to land your dream job !
           </p>
           <div className="flex gap-4">
-            <Link href="/signup">
+            <Link href="/demo">
               <Button size="lg" variant="gradient">
                 Start Free Practice
               </Button>

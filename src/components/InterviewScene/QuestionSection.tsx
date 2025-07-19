@@ -19,6 +19,7 @@ import Caption from './Caption';
 import dynamic from 'next/dynamic';
 import QuestionSectionSkeleton from './QuestionSectionSkeleton';
 import { FE_ASSETS } from '@/constants/imageAssets';
+import QuestionDisplay from './QuestionDisplay';
 
 const WhiteboardCanvas = dynamic(() => import('./AnswerBoardTools/WhiteboardCanvas'), {
   ssr: false,
@@ -126,7 +127,15 @@ const QuestionSection = () => {
           backgroundPosition: 'center',
         }}
       >
-        <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">{}</div>
+        <div className="col-start-1 col-end-2 row-start-1 row-end-2 p-4">
+          {questionText && (
+            <QuestionDisplay
+              questionText={questionText}
+              questionName={currentQuestion?.current_question?.question_name}
+              className="max-h-[300px]"
+            />
+          )}
+        </div>
         <div className="col-start-1 col-end-2 row-start-2 row-end-3">
           <Canvas shadows camera={{ position: [0, 0, 5.5], fov: 40 }}>
             <InterviewerAvatarCanvas />

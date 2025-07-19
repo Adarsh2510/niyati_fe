@@ -3,9 +3,9 @@ import { OverallSummary } from '@/components/InterviewSummary/OverallSummary';
 import { QuestionWiseFeedback } from '@/components/InterviewSummary/QuestionWiseFeedback';
 import { SuggestedInterviews } from '@/components/InterviewSummary/SuggestedInterviews';
 import Footer from '@/components/common/Footer';
-import { suggestedInterviewsData } from '@/app/dashboard/page';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { suggestedInterviewsData } from '@/constants/suggestionCardsData';
 
 export default async function InterviewSummary({ params }: { params: { interview_id: string } }) {
   const { interview_id } = params;

@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { Button } from '../ui/button';
+
 const steps = [
   {
     title: 'Choose Your Focus',
@@ -61,6 +64,13 @@ export default function HowItWorksSection() {
               />
             </div>
           </div>
+        </div>
+        <div className="mt-16 flex justify-center">
+          <Link href="/demo">
+            <Button size="lg" variant="gradient">
+              Try Demo for Free
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
