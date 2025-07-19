@@ -6,11 +6,10 @@ import { getDemoUserDataForSignUp } from './utils';
 import { registerUser } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-
-const demoInterviewId = '686a7c891be97be8a1230678';
+import { initialzeInterviewForm } from '@/components/InterviewSelectForm/util';
 
 const DemoPage = () => {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const router = useRouter();
 
   const handleSignUp = async () => {
@@ -32,11 +31,39 @@ const DemoPage = () => {
     if (status === 'unauthenticated') {
       handleSignUp();
     }
-    if (status === 'authenticated') {
-      localStorage.removeItem('interview-onboarding-completed');
-      router.push(`/dashboard/interview-room/${demoInterviewId}`);
+    if (status === 'authenticated' && session?.user?.id) {
+      handleCreateDemoInterview();
     }
-  }, [status, router]);
+  }, [status, session, router]);
+
+  const handleCreateDemoInterview = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      localStorage.removeItem('interview-onboarding-completed');
+
+      // Reuse the existing interview creation logic with demo parameters
+      const data = await initialzeInterviewForm({
+        user_id: session.user.id,
+        role: 'FRONTEND',
+        experience: 'JUNIOR',
+        domain: 'SOFTWARE_ENGINEER',
+        programmingLanguage: 'JS',
+        targetCompany: 'AMAZON',
+        interviewRound: 'TECHNICAL_ROUND_1',
+      });
+
+      if (!data.interview_id) {
+        toast.error('Failed to create demo interview session');
+        return;
+      }
+
+      router.push(`/dashboard/interview-room/${data.interview_id}`);
+    } catch (error) {
+      console.error('Demo interview initialization error:', error);
+      toast.error('Failed to start demo interview. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center">
