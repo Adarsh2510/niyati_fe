@@ -10,6 +10,7 @@ import {
 } from './AnswerBoardTools/atoms';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { InterviewerAvatar } from '../Avatar';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { ESolutionType } from '@/constants/interview';
@@ -29,7 +30,9 @@ function InterviewerAvatarCanvas() {
   return (
     <Suspense fallback={null}>
       <Environment preset="sunset" />
-      <InterviewerAvatar position={[0, -3, -2]} scale={2} />
+      <ErrorBoundary fallback={null}>
+        <InterviewerAvatar position={[0, -3, -2]} scale={2} />
+      </ErrorBoundary>
     </Suspense>
   );
 }

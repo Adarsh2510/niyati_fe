@@ -157,4 +157,8 @@ export function InterviewerAvatar({ ...props }) {
   );
 }
 
-useGLTF.preload(FE_ASSETS.MISC.INTERVIEWER_AVATAR);
+try {
+  useGLTF.preload(FE_ASSETS.MISC.INTERVIEWER_AVATAR);
+} catch {
+  // Ignore preload failure (e.g. 404); ErrorBoundary will handle render-time load failures
+}

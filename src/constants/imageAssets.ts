@@ -19,11 +19,11 @@ export const getCloudinaryImageUrl = (
 
 export const getCloudinaryModelUrl = (
   publicId: string,
-  folder: keyof typeof CLOUDINARY_CONFIG.folders,
+  folder: keyof typeof CLOUDINARY_CONFIG.folders | undefined,
   version: string,
   isRaw: boolean = false
 ): string => {
-  return `${CLOUDINARY_CONFIG.baseUrl}/${isRaw ? 'raw' : 'image'}/upload/v${version}/${CLOUDINARY_CONFIG.folders[folder]}/${publicId}`;
+  return `${CLOUDINARY_CONFIG.baseUrl}/${isRaw ? 'raw' : 'image'}/upload/v${version}/${folder ? CLOUDINARY_CONFIG.folders[folder] : ''}/${publicId}`;
 };
 
 // Frontend Assets
@@ -42,9 +42,9 @@ export const FE_ASSETS = {
       false
     ),
     MEETING_ANIMATION: getCloudinaryModelUrl(
-      't9j61zkdbmhc5x3o2cgb.fbx',
-      'animations',
-      '1749904558',
+      't9j61zkdbmhc5x3o2cgb_b1m4cf.fbx',
+      undefined,
+      '1771015106',
       true
     ),
     SITTING_IDLE_ANIMATION: getCloudinaryModelUrl(
